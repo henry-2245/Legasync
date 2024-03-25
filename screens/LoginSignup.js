@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
-  Button,
-  Image,
-  StyleSheet,
+  View,
   Text,
   TextInput,
-  View,
   TouchableOpacity,
+  Image,
+  StyleSheet,
 } from "react-native";
 
 const LoginSignup = () => {
@@ -17,20 +16,74 @@ const LoginSignup = () => {
 
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    // Handle login logic here
-    if (email !== "" && password !== "") {
-      // Navigate to home page
-      navigation.navigate("Home");
-    } else {
-      alert("Please fill in your info");
-    }
-  };
+  const handleAuthentication = async () => {
+    try {
+      if (isSignup) {
+        // Handle signup logic
+        const signupData = {
+          email: email,
+          password: password,
+        };
 
-  const handleSignup = () => {
-    // Handle signup logic here
-    alert("Registered successfully");
-    navigation.navigate("Home");
+        const response = await fetch(
+          'http://192.168.10.139/user/add',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(signupData),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        // Assuming the response is JSON, you can parse it like this
+        const result = await response.json();
+        console.log(result);
+
+        alert("Registered successfully");
+        navigation.navigate("TabNavigator");
+       
+      } else {
+        // Handle login logic
+        const loginData = {
+          email: email,
+          password: password,
+        };
+
+        const response = await fetch(
+          'http://192.168.10.139/user/match',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(loginData),
+          }
+        );
+
+        if (!response.ok) {
+          alert("Invalid username or password");
+        }
+
+        // Assuming the response is JSON, you can parse it like this
+        const result = await response.json();
+        console.log(result);
+        
+
+        if (result.email === loginData.email ) {
+          // Login successful, navigate to the home page
+          navigation.navigate("TabNavigator");
+        } else {
+          alert("Invalid username or password");
+        }
+      }
+    } catch (error) {
+      alert("Invalid username or password");
+    }
   };
 
   const toggleSignup = () => {
@@ -58,23 +111,21 @@ const LoginSignup = () => {
         onChangeText={(text) => setPassword(text)}
       />
 
-<Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={isSignup ? handleSignup : handleLogin}
-        >
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={handleAuthentication}
+      >
+        <View style={styles.button}>
           <Text style={styles.buttonText}>
             {isSignup ? "Sign Up" : "Sign in"}
           </Text>
-        </TouchableOpacity>
-      </View>
-
-      
-      
+        </View>
+      </TouchableOpacity>
 
       <Text style={styles.toggleText} onPress={toggleSignup}>
-        {isSignup ? "Already have an account? Login" : "Don't have an account? Sign up"}
+        {isSignup
+          ? "Already have an account? Login"
+          : "Don't have an account? Sign up"}
       </Text>
     </View>
   );
@@ -87,7 +138,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  
   logo: {
     padding: "5%",
     width: "90%",
@@ -109,46 +159,32 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     color: "#fff",
-    borderWidth: 1,
   },
-
   buttonContainer: {
-    
+    width: 328,
+    height: 57,
     borderWidth: 1,
     borderColor: "black",
     backgroundColor: "#FDE48A",
     borderRadius: 8,
-    overflow: "hidden", // This ensures that the borderRadius is applied to the child components
+    overflow: "hidden",
     marginTop: 50,
   },
-
   button: {
-    width: 328,
-    height: 57,
-    
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   buttonText: {
     color: "black",
     fontSize: 20,
-    fontWeight: "bold"
-
+    fontWeight: "bold",
   },
   toggleText: {
     color: "white",
     marginTop: 10,
     fontSize: 16,
   },
-  forgotPasswordText: {
-    color: "white",
-    marginTop: 10,
-    // textDecorationLine: "underline", // Add u
-    alignSelf: "flex-end",
-    marginRight: 50,
-    fontSize: 16,
-    
-  }
 });
 
 export default LoginSignup;

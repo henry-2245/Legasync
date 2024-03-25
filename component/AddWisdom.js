@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TextInput, Button } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 
@@ -6,9 +6,6 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [medium, setMedium] = useState("");
-  
- 
-  
 
   const categories = [
     { key: 0, label: "Technology" },
@@ -21,8 +18,14 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
     { key: 0, label: "Voice Record" },
     { key: 1, label: "Video" },
     { key: 2, label: "Text" },
-    // Add more categories as needed
+    // Add more mediums as needed
   ];
+
+  useEffect(() => {
+    // Set initial values when the component mounts
+    setCategory("Select Category");
+    setMedium("Select Medium");
+  }, []); // Empty dependency array ensures the effect runs only once
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
@@ -31,7 +34,7 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "rgba(0, 0, 0, 0.5)", // Add a semi-transparent background
+          backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
         }}
       >
         <View
@@ -49,7 +52,7 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
               marginBottom: 10,
               textAlign: "center",
               marginBottom: 15,
-              padding: 10
+              padding: 10,
             }}
           >
             Add New Wisdom
@@ -70,30 +73,29 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
           {/* Use ModalSelector for category dropdown */}
           <ModalSelector
             data={categories}
-            initValue="Select Category"
+            initValue={category}
             style={{
               padding: 10,
-
               borderRadius: 5,
               borderColor: "#ccc",
               marginBottom: 15,
             }}
-            initValueTextStyle={{ color: "#808080" }}
+            initValueTextStyle={{ color: category === "Select Category" ? "#808080" : "#000" }}
             selectTextStyle={{ color: "#000" }}
             onChange={(option) => setCategory(option.label)}
           />
 
+          {/* Use ModalSelector for medium dropdown */}
           <ModalSelector
             data={mediums}
-            initValue="Select Medium"
+            initValue={medium}
             style={{
               padding: 10,
-
               borderRadius: 5,
               borderColor: "#ccc",
               marginBottom: 15,
             }}
-            initValueTextStyle={{ color: "#808080" }}
+            initValueTextStyle={{ color: medium === "Select Medium" ? "#808080" : "#000" }}
             selectTextStyle={{ color: "#000" }}
             onChange={(option) => setMedium(option.label)}
           />
@@ -111,7 +113,7 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
             />
             <Button
               title="Submit"
-              onPress={() => onSubmit({ title, category })}
+              onPress={() => onSubmit({ title, category, medium })}
               color="#FDE48A" // Adjust the color to match your design
             />
           </View>
