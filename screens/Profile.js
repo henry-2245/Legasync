@@ -31,7 +31,7 @@
 //         Logout
 //       </Button>
 //     </View>
-    
+
 //   );
 // };
 
@@ -67,7 +67,7 @@
 
 //   },
 //   follow: {
-    
+
 //     flexDirection: 'row',
 //     justifyContent: 'space-between'
 
@@ -80,41 +80,47 @@
 
 //   }
 
-  
 // });
 
 // export default Profile;
 
+//test
 
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import WisdomWidget from './WisdomWidget';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Button,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import WisdomWidget from "./WisdomWidget";
 
 const Profile = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState({
-    name: 'John David',
-    occupation: 'Motivational Speaker',
+    name: "John David",
+    occupation: "Motivational Speaker",
     followers: 13400,
     following: 1462,
     posts: 1,
-    profileImage: require('legasync/Images/Abdul.jpg'),
+    profileImage: require("legasync/Images/Abdul.jpg"),
   });
 
-  const handleClick = () =>{
-      navigation.navigate("LoginSignup");
-    }
+  const handleClick = () => {
+    navigation.navigate("LoginSignup");
+  };
 
+  const handleEditProfile = () => {
+    navigation.navigate("EditProfile");
+  };
 
- 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={user.profileImage}
-          style={styles.profileImage}
-        />
+        <Image source={user.profileImage} style={styles.profileImage} />
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.occupation}>{user.occupation}</Text>
       </View>
@@ -134,10 +140,19 @@ const Profile = () => {
         </View>
       </View>
 
+      <View style={styles.editBtnContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
+          <Text style={styles.buttonText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.bioContainer}>
         <Text style={styles.bioTitle}>My Bio</Text>
         <Text style={styles.bioText}>
-          I'm a motivational speaker and I'm always looking for new ways to improve my life. I'm also always looking for new ways to connect with people and make a difference in the world. I'm passionate about helping others reach their full potential and live their best lives.
+          I'm a motivational speaker and I'm always looking for new ways to
+          improve my life. I'm also always looking for new ways to connect with
+          people and make a difference in the world. I'm passionate about
+          helping others reach their full potential and live their best lives.
         </Text>
       </View>
 
@@ -146,8 +161,8 @@ const Profile = () => {
         image={require('legasync/Images/Nat.png')}
         text="I'm passionate about biology and I love learning about the natural world."
       /> */}
-      <Button title = "Logout" onPress = {handleClick}>
-       Logout
+      <Button title="Logout" onPress={handleClick}>
+        Logout
       </Button>
     </View>
   );
@@ -156,10 +171,10 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2F2D2D',
+    backgroundColor: "#2F2D2D",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 50,
   },
   profileImage: {
@@ -169,49 +184,73 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
-    color: 'white'
+    color: "white",
   },
   occupation: {
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginTop: 20,
   },
   statsRow: {
-    alignItems: 'center',
-    color: 'white'
+    alignItems: "center",
+    color: "white",
   },
   statsNumber: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white'
-    
+    fontWeight: "bold",
+    color: "white",
   },
   statsLabel: {
     fontSize: 14,
-    color: 'white',
-
+    color: "white",
   },
+
+  button: {
+    width: 328,
+    height: 57,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
+  editBtnContainer: {
+    marginTop: 20,
+    width: 180,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "black",
+    backgroundColor: "#FDE48A",
+    borderRadius: 20,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   bioContainer: {
     marginTop: 20,
     padding: 10,
   },
   bioTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 30,
   },
   bioText: {
     fontSize: 16,
-    color: 'white',
+    color: "white",
     marginBottom: 30,
-
   },
 });
 
