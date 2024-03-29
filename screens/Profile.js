@@ -76,6 +76,9 @@ const Profile = ({ isYourOwnProfile }) => {
   const handleClick = () => {
     navigation.navigate("LoginSignup");
   };
+  const handleEditProfile = () => {
+    navigation.navigate("EditProfile");
+  };
 
   const chunkArray = (array, chunkSize) => {
     return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, index) =>
@@ -133,7 +136,7 @@ const Profile = ({ isYourOwnProfile }) => {
         </View>
         <View style={styles.buttonContainer}>
           {isYourOwnProfile ? (
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
               <Text style={styles.buttonText}>{"Edit Profile"}</Text>
             </TouchableOpacity>
           ) : (

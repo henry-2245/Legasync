@@ -69,8 +69,13 @@ const WisdomDetail = ({ route }) => {
   };
 
   const handleChatBubblePress = () => {
-    // Show the comment popup
-    setCommentPopupVisible(true);
+    // If the comment popup is already visible, close it
+    if (commentPopupVisible) {
+      setCommentPopupVisible(false);
+    } else {
+      // Otherwise, show the comment popup
+      setCommentPopupVisible(true);
+    }
   };
 
   const handleCloseCommentPopup = (updatedComments) => {

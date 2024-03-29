@@ -12,6 +12,8 @@ import {
 const LoginSignup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(""); // Placeholder for username
+
   const [isSignup, setIsSignup] = useState(false);
 
   const navigation = useNavigation();
@@ -23,10 +25,11 @@ const LoginSignup = () => {
         const signupData = {
           email: email,
           password: password,
+          username: username, // Pass username data for signup
         };
 
         const response = await fetch(
-          'http://192.168.10.139/user/add',
+          'https://legasync.azurewebsites.net/user/add',
           {
             method: 'POST',
             headers: {
@@ -55,7 +58,7 @@ const LoginSignup = () => {
         };
 
         const response = await fetch(
-          'http://192.168.10.139/user/match',
+          'https://legasync.azurewebsites.net/user/match',
           {
             method: 'POST',
             headers: {
@@ -96,21 +99,43 @@ const LoginSignup = () => {
       <Image source={require("legasync/Images/logo.png")} style={styles.logo} />
       <Text style={styles.title}>{isSignup ? "Sign Up" : "Login"}</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
+      {/* Email input */}
+      <View>
+        <Text style={styles.inputLabel}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-      />
+      {/* Password input */}
+      <View>
+        <Text style={styles.inputLabel}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+      </View>
 
+      {/* Conditionally render username input only for signup */}
+      {isSignup && (
+        <View>
+          <Text style={styles.inputLabel}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Choose a username"
+            value={username}
+            onChangeText={(text) => setUsername(text)}
+          />
+        </View>
+      )}
+
+      {/* Button and toggle text */}
       <TouchableOpacity
         style={styles.buttonContainer}
         onPress={handleAuthentication}
@@ -148,7 +173,11 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 70,
+    marginBottom: 30, // Reduced margin for better spacing
+  },
+  inputLabel: {
+    color: "#FDE48A",
+    marginBottom: 5,
   },
   input: {
     width: 328,
