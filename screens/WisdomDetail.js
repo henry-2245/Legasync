@@ -151,6 +151,7 @@ const WisdomDetail = ({ route }) => {
     setIsHearted(false);
     article.likes = initialLikeCount;
     setComments(article.comments || []);
+    setCommentPopupVisible(false)
   }, [article]);
 
   return (
