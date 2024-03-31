@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
   const navigation = useNavigation();
+  const [initialLikeCount, setInitialLikeCount] = useState(article.likes);
   const [articles, setArticles] = useState([
     {
       title: "Surviving a Hollywood life",
@@ -86,8 +87,8 @@ const WisdomDetail = ({ route }) => {
   const [commentPopupVisible, setCommentPopupVisible] = useState(false);
 
   const handleHeartPress = () => {
-    // Toggle the heart icon and update the like count
     setIsHearted((prev) => !prev);
+    article.likes += isHearted ? -1 : 1;
   };
   const handleProfilePress = async () => {
     // Navigate to other profile
@@ -146,6 +147,9 @@ const WisdomDetail = ({ route }) => {
 
   useEffect(() => {
     // Reset comments when article changes
+    
+    setIsHearted(false);
+    article.likes = initialLikeCount;
     setComments(article.comments || []);
   }, [article]);
 
