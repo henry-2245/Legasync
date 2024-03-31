@@ -71,7 +71,13 @@ const EditProfile = () => {
   };
 
 
-  const handleSavePress = () => {
+  const handleSavePress = async() => {
+    try {
+        await AsyncStorage.setItem('username', username);
+        console.log('Username updated successfully:', username);
+      } catch (error) {
+        console.log('Error updating username:', error);
+      }
     // Pass the selected image URI back to the Profile component
     console.log("Selected Image URI:", selectedImage);
     navigation.navigate("Profile", {

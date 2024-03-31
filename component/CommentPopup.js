@@ -1,31 +1,64 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CommentPopup = ({ comments, onClose }) => {
+const CommentPopup = ({ comments, onClose, setComments }) => {
   const [comment, setComment] = useState("");
+  const [username, setUsername] = useState("");
+  const scrollViewRef = useRef(null);
+
+  useEffect(() => {
+    const getUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (storedUsername !== null) {
+          setUsername(storedUsername);
+        }
+      } catch (error) {
+        console.log('Error retrieving username:', error);
+      }
+    };
+  
+    getUsername();
+  }, []);
+
+  useEffect(() => {
+    // Scroll to the bottom of the ScrollView when comments change
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [comments]);
 
   const handleCommentSubmit = () => {
     // Handle submitting the comment only if it's not empty
     if (comment.trim() !== "") {
-      onClose([...(comments || []), { username: "Chxttp", commentText: comment.trim() }]);
-      // Clear the comment input after posting
-      setComment("");
+      const newComment = { username: username, text: comment.trim() };
+      setComment(""); // Clear the comment input after posting
+      setComments([...comments, newComment]); // Add the new comment to the comments array
     }
   };
 
   return (
     <View style={styles.popupContainer}>
-      <View style={styles.commentsContainer}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Comments</Text>
+        <TouchableOpacity onPress={onClose}>
+          <Ionicons name="close" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+      <ScrollView ref={scrollViewRef} style={styles.commentsContainer}>
         {comments.map((c, index) => (
           <View key={index} style={styles.commentItem}>
             <Text style={styles.commentUsername}>{c.username}</Text>
-            <Text style={styles.commentText}>{c.commentText}</Text>
+            <Text style={styles.commentText}>{c.text}</Text>
           </View>
         ))}
-      </View>
+        <View style={styles.scrollEndDummy} />
+      </ScrollView>
       <TextInput
         style={styles.commentInput}
-        placeholder="Write a comment..."
+        placeholder="Add a public comment..."
         value={comment}
         onChangeText={(text) => setComment(text)}
       />
@@ -34,10 +67,7 @@ const CommentPopup = ({ comments, onClose }) => {
         onPress={handleCommentSubmit}
         disabled={!comment.trim()}
       >
-        <Text style={styles.postButtonText}>Post</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-        <Text style={styles.closeButtonText}>Close</Text>
+        <Text style={styles.postButtonText}>Comment</Text>
       </TouchableOpacity>
     </View>
   );
@@ -48,28 +78,37 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    marginTop: '10%',
+    marginTop: 0, // Adjusted marginTop value
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   commentsContainer: {
-    marginBottom: 10,
+    maxHeight: 200, // Set a max height for the comments container to make it scrollable
   },
   commentItem: {
     marginBottom: 10,
     padding: 10,
-    backgroundColor: "#F0F2F5", // Background color for each comment
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
   },
   commentUsername: {
     fontWeight: "bold",
     marginBottom: 5,
-    color: "#1877F2", // Facebook blue color
+    color: "#000",
   },
   commentText: {
-    color: "#000", // Black color for comment text
+    color: "#000",
+  },
+  scrollEndDummy: {
+    height: 1, // A dummy view at the end of the ScrollView to ensure it scrolls to the very bottom
+    marginBottom: 100, // Adjust this value as needed
   },
   commentInput: {
     marginBottom: 10,
@@ -83,21 +122,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
-    marginBottom: 10,
   },
   postButtonText: {
     color: "white",
     fontWeight: "bold",
   },
   disabledButton: {
-    backgroundColor: "#B0C4DE", // Use a different color for disabled state
-  },
-  closeButton: {
-    marginTop: 10,
-    alignSelf: "flex-end",
-  },
-  closeButtonText: {
-    color: "#1877F2", // Facebook blue color
+    backgroundColor: "#B0C4DE",
   },
 });
 
