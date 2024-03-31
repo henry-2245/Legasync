@@ -11,6 +11,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import Wisdom from "../component/Wisdom";
 import CommentPopup from "../component/CommentPopup";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
@@ -67,8 +68,27 @@ const WisdomDetail = ({ route }) => {
     // Toggle the heart icon and update the like count
     setIsHearted((prev) => !prev);
   };
+  const handleProfilePress = async () => {
+    // Navigate to other profile
+    navigation.navigate("OtherProfile", {
+      isYourOwnProfile: false,
+    });
+    
+  
+    // Store user data to AsyncStorage
+    try {
+      await AsyncStorage.setItem('other-username', article.author.name);
+      await AsyncStorage.setItem('other-profileImage', String( article.author.profileImage ));
+
+
+      console.log('Data stored successfully');
+    } catch (error) {
+      console.log('Error storing data:', error);
+    }
+  };
 
   const handleChatBubblePress = () => {
+    
     // If the comment popup is already visible, close it
     if (commentPopupVisible) {
       setCommentPopupVisible(false);
@@ -103,6 +123,9 @@ const WisdomDetail = ({ route }) => {
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
   }, [article]);
 
+  
+
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <TouchableOpacity
@@ -113,14 +136,13 @@ const WisdomDetail = ({ route }) => {
       </TouchableOpacity>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("OtherProfile", { isYourOwnProfile: false })
-          }
+          onPress={handleProfilePress}
         >
           <View style={styles.authorContainer}>
             <Image
               source={article.author.profileImage}
               style={styles.profileImage}
+              
             />
             <Text style={styles.authorName}>{article.author.name}</Text>
           </View>

@@ -3,10 +3,8 @@ import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const Avatar = ({}) => {
-  const [selectedImage, setSelectedImage] = useState(
-    "legasync/Images/avatar.png" //this picture is not loading for some reason
-  ); 
+const Avatar = ({selectedImage, onImageSelect }) => {
+
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -18,8 +16,8 @@ const Avatar = ({}) => {
 
     console.log(result);
 
-    if (!(await result.canceled)) {
-      setSelectedImage(result.assets[0].uri);
+    if (!(result.canceled)) {
+      onImageSelect(result.assets[0].uri);
     }
   };
 

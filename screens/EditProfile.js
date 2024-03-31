@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,13 +9,19 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Textbox from "../component/EditProfile/Textbox";
 import BlackButton from "../component/EditProfile/BlackButton";
 import Avatar from "../component/EditProfile/Avatar";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EditProfile = () => {
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+  const route = useRoute();
+  const [selectedImage, setSelectedImage] = useState(route.params?.profileImage || "");
+  const [bio, setBio] = useState(route.params.bio || "");
   const [user, setUser] = useState({
     name: "John David",
     occupation: "Motivational Speaker",
@@ -24,12 +30,55 @@ const EditProfile = () => {
     posts: 1,
     profileImage: require("legasync/Images/Abdul.jpg"),
   });
+  useEffect(() => {
+    const getEmail = async () => {
+      try {
+        const storedEmail = await AsyncStorage.getItem('email');
+        if (storedEmail !== null) {
+          setEmail(storedEmail)
+        }
+      } catch (error) {
+        console.log('Error retrieving username:', error);
+      }
+    };
+  
+    getEmail();
+  }, []);
+
+  useEffect(() => {
+    const getUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (storedUsername !== null) {
+          setUsername(storedUsername);
+        }
+      } catch (error) {
+        console.log('Error retrieving username:', error);
+      }
+    };
+  
+    getUsername();
+  }, []);
 
   const navigation = useNavigation();
 
-  //still testing
+  const handleBioChange = (text) => {
+    setBio(text);
+  };
+
+  const handleImageSelect = (uri) => {
+    setSelectedImage(uri);
+  };
+
+
   const handleSavePress = () => {
-    console.log("Saved Pressed");
+    // Pass the selected image URI back to the Profile component
+    console.log("Selected Image URI:", selectedImage);
+    navigation.navigate("Profile", {
+      profileImage: selectedImage,
+      occupation: bio,
+      username: username,
+    });
   };
 
   return (
@@ -51,14 +100,17 @@ const EditProfile = () => {
         </View>
 
         <View style={styles.profileSection}>
-          <Avatar></Avatar>
+          <Avatar
+            selectedImage={selectedImage}
+            onImageSelect={handleImageSelect}
+          ></Avatar>
         </View>
 
         <View style={styles.bottomSection}>
-          <Textbox label="Username" />
-          <Textbox label="Email" />
-          <Textbox label="Phone Number" keyboardType="number-pad" />
-          <Textbox label="Bio" />
+          <Textbox label="Username" value={username} onChangeText={setUsername} />
+          <Textbox label="Email" value={email} onChangeText={setEmail}/>
+          <Textbox label="Phone Number"  />
+          <Textbox label="Bio" value={bio} onChangeText={setBio} />
           <BlackButton onPress={handleSavePress} title="Save" />
         </View>
       </KeyboardAvoidingView>
@@ -89,7 +141,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: -50,
     right: 5,
-    
   },
   bottomSection: {
     marginTop: 50,
@@ -125,101 +176,3 @@ const styles = StyleSheet.create({
 
 export default EditProfile;
 
-// import {
-//   StyleSheet,
-//   View,
-//   Text,
-//   TouchableOpacity,
-//   ScrollView,
-//   Image,
-//   TextInput,
-//   Modal,
-// } from "react-native";
-// import React, { useState } from "react";
-// import { useNavigation } from "@react-navigation/native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { MaterialIcons } from "@expo/vector-icons";
-
-// const EditProfile = () => {
-
-//   const [user, setUser] = useState({
-//         name: "John David",
-//         occupation: "Motivational Speaker",
-//         followers: 13400,
-//         following: 1462,
-//         posts: 1,
-//         profileImage: require("legasync/Images/Abdul.jpg"),
-//       });
-
-//   const navigation = useNavigation();
-
-//   return (
-//     <SafeAreaView style={styles.safeContainer}>
-//       <View style={styles.topSection}>
-//         <TouchableOpacity
-//           style={styles.backButton}
-//           onPress={() => navigation.goBack()}
-//         >
-//           <MaterialIcons name="keyboard-arrow-left" size={45} color="white" />
-//         </TouchableOpacity>
-
-//         <Text style={styles.tsText}>Edit Profile</Text>
-//       </View>
-
-//       <ScrollView>
-//         <View style={styles.midSection}>
-//           <TouchableOpacity >
-//             <Image source={user.profileImage} style={styles.profileImage}></Image>
-//           </TouchableOpacity>
-//         </View>
-//       </ScrollView>
-
-//     </SafeAreaView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   safeContainer: {
-//     flex: 1,
-//     backgroundColor: "#2F2D2D",
-//     paddingHorizontal: 20,
-//   },
-
-//   topSection: {
-//     paddingTop: 23,
-//     marginHorizontal: 12,
-//     flexDirection: "row",
-//     justifyContent: "center",
-//     marginTop:30,
-//     left: 10,
-//   },
-
-//   tsText: {
-//     fontWeight: "bold",
-//     fontSize: 35,
-//     color: "white",
-//     lineHeight: 35,
-//   },
-
-//   backButton: {
-//     paddingTop: 15,
-//     position: "absolute",
-//     left: -20,
-//   },
-
-//   midSection:{
-//     alignItems: "center",
-//     marginVertical: 22,
-//   },
-
-//   profileImage:{
-//     width: 100,
-//     height: 100,
-//     borderRadius: 50,
-//     alignSelf: "center",
-//     borderWidth: 2,
-//     borderColor: "white",
-//   },
-// });
-
-// export default EditProfile;
