@@ -4,13 +4,14 @@ import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const Avatar = ({}) => {
+  
   const [selectedImage, setSelectedImage] = useState(
     "legasync/Images/avatar.png" //this picture is not loading for some reason
-  ); 
+  );
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Image,
       allowsEditing: true,
       aspect: [4, 4],
       quality: 1,

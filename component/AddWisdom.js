@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TextInput, Button } from "react-native";
+import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import ModalSelector from "react-native-modal-selector";
+import Picker from "./Picker";
 
 const AddWisdom = ({ visible, onClose, onSubmit }) => {
   const [title, setTitle] = useState("");
@@ -39,83 +41,107 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
       >
         <View
           style={{
-            width: "80%",
+            height: "80%", // Adjust height as needed
+            width: "90%",
             backgroundColor: "white",
             borderRadius: 10,
             padding: 20,
+            justifyContent: "space-between", // Align items with space between them
           }}
         >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "bold",
-              marginBottom: 10,
-              textAlign: "center",
-              marginBottom: 15,
-              padding: 10,
+          {/* Modal content */}
+          <View>
+            <Text
+              style={{
+                fontSize: 30,
+                fontWeight: "bold",
+                marginBottom: 10,
+                textAlign: "center",
+                marginBottom: 15,
+                padding: 10,
+              }}
+            >
+              Add New Wisdom
+            </Text>
+            <TextInput
+              style={{
+                padding: 10,
+                borderWidth: 1,
+                borderRadius: 5,
+                borderColor: "#ccc",
+                marginBottom: 15,
+              }}
+              placeholder="Enter title of article"
+              value={title}
+              onChangeText={(text) => setTitle(text)}
+            />
+
+            {/* Use ModalSelector for category dropdown */}
+            <ModalSelector
+              data={categories}
+              initValue={category}
+              style={{
+                padding: 10,
+                borderRadius: 5,
+                borderColor: "#ccc",
+                marginBottom: 15,
+              }}
+              initValueTextStyle={{
+                color: category === "Select Category" ? "#808080" : "#000",
+              }}
+              selectTextStyle={{ color: "#000" }}
+              onChange={(option) => setCategory(option.label)}
+            />
+
+            {/* Use ModalSelector for medium dropdown */}
+            <ModalSelector
+              data={mediums}
+              initValue={medium}
+              style={{
+                padding: 10,
+                borderRadius: 5,
+                borderColor: "#ccc",
+                marginBottom: 15,
+              }}
+              initValueTextStyle={{
+                color: medium === "Select Medium" ? "#808080" : "#000",
+              }}
+              selectTextStyle={{ color: "#000" }}
+              onChange={(option) => setMedium(option.label)}
+            />
+          </View>
+
+          <View 
+          style={{ 
+            flexDirection: "row",
+            
             }}
           >
-            Add New Wisdom
-          </Text>
-          <TextInput
-            style={{
-              padding: 10,
-              borderWidth: 1,
-              borderRadius: 5,
-              borderColor: "#ccc",
-              marginBottom: 15,
-            }}
-            placeholder="Enter title of article"
-            value={title}
-            onChangeText={(text) => setTitle(text)}
-          />
+            <Picker></Picker>
+          </View>
 
-          {/* Use ModalSelector for category dropdown */}
-          <ModalSelector
-            data={categories}
-            initValue={category}
-            style={{
-              padding: 10,
-              borderRadius: 5,
-              borderColor: "#ccc",
-              marginBottom: 15,
-            }}
-            initValueTextStyle={{ color: category === "Select Category" ? "#808080" : "#000" }}
-            selectTextStyle={{ color: "#000" }}
-            onChange={(option) => setCategory(option.label)}
-          />
-
-          {/* Use ModalSelector for medium dropdown */}
-          <ModalSelector
-            data={mediums}
-            initValue={medium}
-            style={{
-              padding: 10,
-              borderRadius: 5,
-              borderColor: "#ccc",
-              marginBottom: 15,
-            }}
-            initValueTextStyle={{ color: medium === "Select Medium" ? "#808080" : "#000" }}
-            selectTextStyle={{ color: "#000" }}
-            onChange={(option) => setMedium(option.label)}
-          />
-
+          {/* Buttons */}
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-around",
             }}
           >
-            <Button
-              title="Cancel"
-              onPress={onClose}
-              color="#808080" // Adjust the color to match your design
-            />
-            <Button
-              title="Submit"
-              onPress={() => onSubmit({ title, category, medium })}
-              color="#FDE48A" // Adjust the color to match your design
-            />
+            <View style={{ width: 120 }}>
+              <Button
+                title="Cancel"
+                onPress={onClose}
+                color="#808080" // Adjust the color to match your design
+              />
+            </View>
+
+            <View style={{ width: 120 }}>
+              <Button
+                title="Submit"
+                onPress={() => onSubmit({ title, category, medium })}
+                color="#f5ca31" // Adjust the color to match your design
+              />
+            </View>
           </View>
         </View>
       </View>
