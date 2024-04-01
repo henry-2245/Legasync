@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
-import ImageViewer from "./ImageViewer";
+import FileViewer from "./FileViewer";
 import Button from "./Button";
 
 const Picker = ({}) => {
-  const PlaceholderImage = require("legasync/Images/Grace.jpg");
+  // const PlaceholderImage = require("legasync/Images/Grace.jpg");
+  const PlaceholderVideo = {
+    uri: null,
+    type: "image",
+  };
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  // const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const pickMediaAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -18,10 +23,8 @@ const Picker = ({}) => {
       quality: 1,
     });
 
-    console.log(result);
-
-    if (!result.cancelled && result.assets.length > 0) {
-      setSelectedImage(result.assets[0].uri);
+    if (!result.canceled && result.assets.length > 0) {
+      setSelectedFile(result.assets[0]);
     } else {
       alert("You did not select any media.");
     }
@@ -30,18 +33,18 @@ const Picker = ({}) => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <ImageViewer
-          placeholderImageSource={PlaceholderImage}
-          selectedImage={selectedImage}
+        <FileViewer
+          placeholderFileSource={PlaceholderVideo}
+          selectedFile={selectedFile}
         />
       </View>
       <View style={styles.footerContainer}>
         <Button
           theme="primary"
-          label="Choose a Photo"
+          label="Choose a File"
           onPress={pickMediaAsync}
         />
-        <Button label="Use this Photo" />
+        <Button label="Use this File" />
       </View>
     </View>
   );
@@ -50,21 +53,20 @@ const Picker = ({}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // flexDirection: "column",
     backgroundColor: "yellow",
     alignItems: "center",
     justifyContent: "center",
   },
   imageContainer: {
-    flex: 0,
-    paddingBottom: 18,
+    flexGrow: 1,
+    height: 200,
   },
-
   footerContainer: {
     flex: 1,
     flexDirection: "row",
     backgroundColor: "purple",
     alignItems: "center",
+    paddingTop: 20,
   },
 });
 

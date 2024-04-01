@@ -15,6 +15,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Profile from "./Profile";
 import { Ionicons } from "@expo/vector-icons";
 import Search from "./Search";
+import NewAddWisdom from "./NewAddWisdom.js";
 
 const Home = () => {
   const Tab = createBottomTabNavigator();
@@ -43,7 +44,6 @@ const Home = () => {
   }, [route.params]);
 
   // ... rest of your code ...
-
 
   const [articles, setArticles] = useState([
     {
@@ -96,6 +96,11 @@ const Home = () => {
     // Add logic for handling the submitted title
   };
 
+  {/* Don't Delete for NewAddWisdom */}
+  // const handleAddButtonPress = () => {
+  //   navigation.navigate("NewAddWisdom");
+  // };
+
   const renderArticles = () => {
     const filteredArticles =
       selectedCategory === "All Categories"
@@ -118,14 +123,11 @@ const Home = () => {
           {rowArticles.map((article, index) => (
             <View style={styles.articleContainer}>
               <Wisdom
-              key={index}
-              article={article}
-              onPress={() => navigation.navigate("WisdomDetail", { article })}
-            />
-
-
+                key={index}
+                article={article}
+                onPress={() => navigation.navigate("WisdomDetail", { article })}
+              />
             </View>
-            
           ))}
         </View>
       );
@@ -175,12 +177,9 @@ const styles = StyleSheet.create({
     display: "flex",
     backgroundColor: "#2F2D2D",
     padding: 10,
-    paddingTop: '15%'
+    paddingTop: "15%",
   },
-  mainContainer: {
-    
-    
-  },
+  mainContainer: {},
   header: {
     marginTop: 10,
     padding: 10,
@@ -189,7 +188,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     display: "flex",
     justifyContent: "center",
-   
   },
   title: {
     fontSize: 30,
@@ -217,38 +215,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   articlesContainer: {
-   
-    width: '50%',
-    justifyContent: 'space-between'
-      
+    width: "50%",
+    justifyContent: "space-between",
   },
-  articleContainer:{
-    
+  articleContainer: {
     marginRight: 10,
-    marginLeft: 10
-
+    marginLeft: 10,
   },
-  articleWrapper:{
+  articleWrapper: {
     flex: 1,
-    padding: '1%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-
+    padding: "1%",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   rowContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 30,
-    
-   
-    
-    
-   
-    
   },
   article: {
-   
-   
     width: "4%",
     padding: 10,
     backgroundColor: "black",

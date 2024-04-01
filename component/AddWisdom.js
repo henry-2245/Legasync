@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import ModalSelector from "react-native-modal-selector";
-import Picker from "./Picker";
+import Picker from "./AddWisdom/Picker";
+import "react-native-gesture-handler";
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+} from "@gorhom/bottom-sheet";
+
 
 const AddWisdom = ({ visible, onClose, onSubmit }) => {
   const [title, setTitle] = useState("");
@@ -41,8 +47,8 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
       >
         <View
           style={{
-            height: "80%", // Adjust height as needed
-            width: "90%",
+            height: "85%", // Adjust height as needed
+            width: "100%",
             backgroundColor: "white",
             borderRadius: 10,
             padding: 20,
@@ -94,7 +100,7 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
             />
 
             {/* Use ModalSelector for medium dropdown */}
-            <ModalSelector
+            {/* <ModalSelector
               data={mediums}
               initValue={medium}
               style={{
@@ -108,9 +114,10 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
               }}
               selectTextStyle={{ color: "#000" }}
               onChange={(option) => setMedium(option.label)}
-            />
+            /> */}
           </View>
 
+          {/* Media Picker */}
           <View 
           style={{ 
             flexDirection: "row",
@@ -137,7 +144,7 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
 
             <View style={{ width: 120 }}>
               <Button
-                title="Submit"
+                title="Post"
                 onPress={() => onSubmit({ title, category, medium })}
                 color="#f5ca31" // Adjust the color to match your design
               />
@@ -150,3 +157,5 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
 };
 
 export default AddWisdom;
+
+
