@@ -9,6 +9,7 @@ import Profile from '../screens/Profile';
 import FollowerPopup from './FollowerPopup';
 import FollowingPopup from './FollowingPopup';
 import EditProfile from '../screens/EditProfile';
+import NewAddWisdom from '../screens/NewAddWisdom';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,7 @@ const StackNavigator = () => {
       <Stack.Screen name="OtherProfile" component={Profile} />
       <Stack.Screen name="FollowingPopup" component={FollowingPopup} />
       <Stack.Screen name="FollowerPopup" component={FollowerPopup} />
+      <Stack.Screen name="NewAddWisdom" component={NewAddWisdom} />
     </Stack.Navigator>
   );
 };

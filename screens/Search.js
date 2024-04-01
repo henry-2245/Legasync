@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   searchButton: {
     backgroundColor: "#d9d9d9",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 18,
   },
   searchButtonText: {
     fontSize: 16,
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     height: 100,
     objectFit: "contain",
     marginBottom: 5,
-    borderRadius: "10%",
+    borderRadius: 18,
   },
   contentText: {
     color: "#fff",
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   clickTrending: {
     backgroundColor: '#d9d9d9',
-    borderRadius: '10%',
+    borderRadius: 18,
    marginBottom: '5%',
   },
   additionalText: {

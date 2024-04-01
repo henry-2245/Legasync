@@ -113,6 +113,7 @@ const LoginSignup = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your email"
+          placeholderTextColor="grey"
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
@@ -124,6 +125,7 @@ const LoginSignup = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
+          placeholderTextColor="grey"
           secureTextEntry={true}
           value={password}
           onChangeText={(text) => setPassword(text)}
@@ -137,6 +139,7 @@ const LoginSignup = () => {
           <TextInput
             style={styles.input}
             placeholder="Choose a username"
+            placeholderTextColor="grey"
             value={username}
             onChangeText={(text) => setUsername(text)}
           />
