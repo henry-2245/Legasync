@@ -8,7 +8,7 @@ const Avatar = ({selectedImage, onImageSelect }) => {
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 4],
       quality: 1,
