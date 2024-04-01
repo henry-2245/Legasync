@@ -52,7 +52,8 @@ const LoginSignup = () => {
 
         alert("Registered successfully");
         navigation.navigate("TabNavigator");
-       
+        await AsyncStorage.setItem('username', signupData.username);
+        await AsyncStorage.setItem('email', signupData.email)
       } else {
         // Handle login logic
         const loginData = {
