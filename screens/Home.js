@@ -54,6 +54,13 @@ const Home = () => {
       },
       image: require("legasync/Images/pic1.png"),
       category: "Computer Science",
+      likes: 100,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User2", text: "I enjoyed reading this." },
+        {username: "User3", text: "What is up?"}
+      ],
+      saved: 0,
     },
     {
       title: "Surviving a Hollywood life",
@@ -63,6 +70,12 @@ const Home = () => {
       },
       image: require("legasync/Images/pic2.png"),
       category: "Technology",
+      likes: 10,
+      comments: [
+        { username: "User1", text: "Amazingg" },
+        { username: "User2", text: "I want thiss." },
+      ],
+      saved: 0,
     },
     {
       title: "How to take risks",
@@ -72,6 +85,12 @@ const Home = () => {
       },
       image: require("legasync/Images/pic3.png"),
       category: "Business",
+      likes: 20,
+      comments: [
+        { username: "User1", text: "So Risky" },
+        { username: "User2", text: "I enjoyed risk." },
+      ],
+      saved: 0,
     },
     {
       title: "How computer data",
@@ -81,6 +100,13 @@ const Home = () => {
       },
       image: require("legasync/Images/pic1.png"),
       category: "Computer Science",
+      likes: 100,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User2", text: "I enjoyed reading this." },
+        {username: "User3", text: "What is up?"}
+      ],
+      saved: 0,
     },
     // Add more articles...
   ]);

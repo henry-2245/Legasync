@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   View,
   Text,
@@ -13,6 +15,7 @@ const LoginSignup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState(""); // Placeholder for username
+  
 
   const [isSignup, setIsSignup] = useState(false);
 
@@ -49,7 +52,8 @@ const LoginSignup = () => {
 
         alert("Registered successfully");
         navigation.navigate("TabNavigator");
-       
+        await AsyncStorage.setItem('username', signupData.username);
+        await AsyncStorage.setItem('email', signupData.email)
       } else {
         // Handle login logic
         const loginData = {
@@ -78,8 +82,12 @@ const LoginSignup = () => {
         
 
         if (result.email === loginData.email ) {
+          setUsername(result.username);
+          await AsyncStorage.setItem('username', result.username);
+          await AsyncStorage.setItem('email', result.email)
           // Login successful, navigate to the home page
           navigation.navigate("TabNavigator");
+
         } else {
           alert("Invalid username or password");
         }

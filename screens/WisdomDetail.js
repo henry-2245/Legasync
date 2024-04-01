@@ -11,10 +11,12 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import Wisdom from "../component/Wisdom";
 import CommentPopup from "../component/CommentPopup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
   const navigation = useNavigation();
+  const [initialLikeCount, setInitialLikeCount] = useState(article.likes);
   const [articles, setArticles] = useState([
     {
       title: "Surviving a Hollywood life",
@@ -24,6 +26,12 @@ const WisdomDetail = ({ route }) => {
       },
       image: require("legasync/Images/pic2.png"),
       category: "Technology",
+      likes: 10,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User4", text: "I enjoyed reading this." },
+      ],
+      saved: 0,
     },
     {
       title: "How to take risks",
@@ -33,6 +41,12 @@ const WisdomDetail = ({ route }) => {
       },
       image: require("legasync/Images/pic3.png"),
       category: "Business",
+      likes: 20,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User3", text: "I enjoyed reading this." },
+      ],
+      saved: 0,
     },
     {
       title: "Surviving a Hollywood life",
@@ -42,6 +56,12 @@ const WisdomDetail = ({ route }) => {
       },
       image: require("legasync/Images/pic2.png"),
       category: "Technology",
+      likes: 10,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User5", text: "I enjoyed reading this." },
+      ],
+      saved: 0,
     },
     {
       title: "Surviving a Hollywood life",
@@ -51,21 +71,43 @@ const WisdomDetail = ({ route }) => {
       },
       image: require("legasync/Images/pic2.png"),
       category: "Technology",
+      likes: 10,
+      comments: [
+        { username: "User1", text: "Great article!" },
+        { username: "User9", text: "I enjoyed reading this." },
+        { username: "User19", text: "I enjoyed it." },
+      ],
+      saved: 0,
     },
 
     // Add more articles...
   ]);
-  const [comments, setComments] = useState([
-    { username: "User1", commentText: "Great article!" },
-    { username: "User2", commentText: "I enjoyed reading this." },
-   
-  ]);
+  const [comments, setComments] = useState(article.comments || []);
   const [isHearted, setIsHearted] = useState(false);
   const [commentPopupVisible, setCommentPopupVisible] = useState(false);
 
   const handleHeartPress = () => {
-    // Toggle the heart icon and update the like count
     setIsHearted((prev) => !prev);
+    article.likes += isHearted ? -1 : 1;
+  };
+  const handleProfilePress = async () => {
+    // Navigate to other profile
+    navigation.navigate("OtherProfile", {
+      isYourOwnProfile: false,
+    });
+
+    // Store user data to AsyncStorage
+    try {
+      await AsyncStorage.setItem("other-username", article.author.name);
+      await AsyncStorage.setItem(
+        "other-profileImage",
+        String(article.author.profileImage)
+      );
+
+      console.log("Data stored successfully");
+    } catch (error) {
+      console.log("Error storing data:", error);
+    }
   };
 
   const handleChatBubblePress = () => {
@@ -80,10 +122,10 @@ const WisdomDetail = ({ route }) => {
 
   const handleCloseCommentPopup = (updatedComments) => {
     if (Array.isArray(updatedComments)) {
-        // Update the comments and hide the popup
-        setComments(updatedComments);
-      }
-      setCommentPopupVisible(false);
+      // Update the comments and hide the popup
+      setComments(updatedComments);
+    }
+    setCommentPopupVisible(false);
   };
 
   // Helper function to chunk the articles into rows
@@ -103,6 +145,15 @@ const WisdomDetail = ({ route }) => {
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
   }, [article]);
 
+  useEffect(() => {
+    // Reset comments when article changes
+    
+    setIsHearted(false);
+    article.likes = initialLikeCount;
+    setComments(article.comments || []);
+    setCommentPopupVisible(false)
+  }, [article]);
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <TouchableOpacity
@@ -112,11 +163,7 @@ const WisdomDetail = ({ route }) => {
         <Text style={styles.backButtonText}>{"< Back"}</Text>
       </TouchableOpacity>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("OtherProfile", { isYourOwnProfile: false })
-          }
-        >
+        <TouchableOpacity onPress={handleProfilePress}>
           <View style={styles.authorContainer}>
             <Image
               source={article.author.profileImage}
@@ -140,7 +187,7 @@ const WisdomDetail = ({ route }) => {
             size={26}
             color={isHearted ? "red" : "#E0E0E0"}
           />
-          <Text style={styles.menuBarText}>{isHearted ? 21 : 20}</Text>
+          <Text style={styles.menuBarText}>{article.likes || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBarButton}
@@ -153,23 +200,26 @@ const WisdomDetail = ({ route }) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBarButton}>
           <Ionicons name="bookmark-outline" size={26} color="#E0E0E0" />
-          <Text style={styles.menuBarText}>2</Text>
+          <Text style={styles.menuBarText}>{article.saved || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBarButton}>
           <Ionicons name="share-social-outline" size={26} color="#E0E0E0" />
           <Text style={styles.menuBarText}>1</Text>
         </TouchableOpacity>
       </View>
-      
 
       <Text style={styles.articleBody}>{article.body || ""}</Text>
-      <View style={{ marginTop: commentPopupVisible ? "90%" : 0 }}>
+      <View style={{ marginTop: commentPopupVisible ? "5%" : 0 }}>
         {commentPopupVisible && (
-          <CommentPopup comments={comments} onClose={handleCloseCommentPopup} />
+          <CommentPopup
+            comments={comments}
+            onClose={handleCloseCommentPopup}
+            setComments={setComments}
+            
+          />
         )}
       </View>
       <View style={styles.moreText}>
-      
         <View style={styles.discoverWrapper}>
           <Text style={styles.Discover}>More to explore</Text>
         </View>
@@ -294,7 +344,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
- 
 });
 
 export default WisdomDetail;
