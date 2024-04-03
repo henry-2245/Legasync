@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,10 +10,14 @@ import {
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 
-
 const Search = () => {
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
+
+  {
+    /* for serach bar */
+  }
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleSearch = () => {
     console.log(searchText); // Handle search logic here
@@ -27,7 +31,7 @@ const Search = () => {
     <ScrollView style={styles.scrollable}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image style={styles.searchIcon} />
+          {/* <Image style={styles.searchIcon} />
           <TextInput
             style={styles.searchText}
             placeholder="Search..."
@@ -36,7 +40,7 @@ const Search = () => {
           />
           <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
             <Text style={styles.searchButtonText}>Search</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={styles.resultsContainer}>
           {/* Display search results here */}
@@ -45,27 +49,36 @@ const Search = () => {
           <Text style={styles.forYouText}>{"Wisdoms for you"}</Text>
           <View style={styles.forYouContent}>
             <View style={styles.contentWrapper}>
-            <TouchableOpacity onPress={() => handleCategoryClick("Technology")} style={{flex: 1, justifyContent: "center", alignItems: 'center'}}>
-              <Image
-                source={require("legasync/Images/Career.png")}
-                style={styles.contentImage}
-              />
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Technology")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/Career.png")}
+                  style={styles.contentImage}
+                />
                 <Text style={styles.contentText}>{"Career"}</Text>
               </TouchableOpacity>
-              
-
             </View>
             <View style={styles.contentWrapper}>
-              <TouchableOpacity onPress={() => handleCategoryClick("Computer Science")}  style={{flex: 1, justifyContent: "center", alignItems: 'center'}}>
-              <Image
-                source={require("legasync/Images/Education.png")}
-                style={styles.contentImage}
-              />
-              <Text style={styles.contentText}>{"Education"}</Text>
-
-
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Computer Science")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/Education.png")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Education"}</Text>
               </TouchableOpacity>
-
             </View>
           </View>
         </View>
@@ -115,7 +128,7 @@ const styles = StyleSheet.create({
   },
   scrollable: {
     backgroundColor: "#2F2D2D",
-    paddingTop: '12%'
+    paddingTop: "12%",
   },
   searchIcon: {
     // Add styles for search icon
@@ -125,7 +138,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     backgroundColor: "#f5f5f5",
-
+    borderRadius: 18,
     marginRight: 15,
   },
   searchButton: {
@@ -157,12 +170,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   contentWrapper: {
-    justifyContent: 'space-between',
-    marginLeft: '8%',
-    marginRight: '8%',
-    marginTop: '5%',
-    alignItems: 'center'
-  
+    justifyContent: "space-between",
+    marginLeft: "8%",
+    marginRight: "8%",
+    marginTop: "5%",
+    alignItems: "center",
   },
   contentImage: {
     width: 150,
@@ -183,7 +195,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#fff", // Match text color from image
-    marginBottom: '12%',
+    marginBottom: "12%",
     textAlign: "center",
   },
   trendingItem: {
@@ -192,21 +204,19 @@ const styles = StyleSheet.create({
     padding: "5%",
     color: "black", // Match text color from image
 
-    
-
     marginBottom: 15,
   },
   clickTrending: {
-    backgroundColor: '#d9d9d9',
+    backgroundColor: "#d9d9d9",
     borderRadius: 18,
-   marginBottom: '5%',
+    marginBottom: "5%",
   },
   additionalText: {
     fontSize: 12,
     color: "black",
     textAlign: "right",
-    padding: '2%',
-   
+    padding: "2%",
+
     marginTop: 0,
   },
 });

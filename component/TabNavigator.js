@@ -23,11 +23,11 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Search"
+        name="Discover"
         component={Search}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" color={color} size={size} />
+            <Ionicons name="compass" color={color} size={size} />
           ),
           headerShown: false,
         }}

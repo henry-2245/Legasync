@@ -15,6 +15,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Profile from "./Profile";
 import { Ionicons } from "@expo/vector-icons";
 import Search from "./Search";
+import { Searchbar } from "react-native-paper";
 import NewAddWisdom from "./NewAddWisdom.js";
 
 const Home = () => {
@@ -58,7 +59,7 @@ const Home = () => {
       comments: [
         { username: "User1", text: "Great article!" },
         { username: "User2", text: "I enjoyed reading this." },
-        {username: "User3", text: "What is up?"}
+        { username: "User3", text: "What is up?" },
       ],
       saved: 0,
     },
@@ -104,7 +105,7 @@ const Home = () => {
       comments: [
         { username: "User1", text: "Great article!" },
         { username: "User2", text: "I enjoyed reading this." },
-        {username: "User3", text: "What is up?"}
+        { username: "User3", text: "What is up?" },
       ],
       saved: 0,
     },
@@ -124,23 +125,34 @@ const Home = () => {
     // Add logic for handling the submitted title
   };
 
-  {/* Don't Delete for NewAddWisdom */}
+  {
+    /* Don't Delete for NewAddWisdom */
+  }
   // const handleAddButtonPress = () => {
   //   navigation.navigate("NewAddWisdom");
   // };
 
   const renderArticles = () => {
-    const filteredArticles =
-      selectedCategory === "All Categories"
-        ? articles
-        : articles.filter((article) => article.category === selectedCategory);
-
     // return filteredArticles.map((article, index) => (
     //   <Wisdom
     //     key={index}
     //     article={article}
     //     onPress={() => navigation.navigate('WisdomDetail', { article })}
     //   />
+
+    {/* filter logic */}
+    const filteredArticles =
+      searchQuery === "" && selectedCategory === "All Categories"
+        ? articles
+        : articles.filter((article) =>
+            (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              article.author.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())) &&
+            selectedCategory === "All Categories"
+              ? true
+              : article.category === selectedCategory
+          );
 
     // ));
     const rows = [];
@@ -165,11 +177,23 @@ const Home = () => {
     return rows;
   };
 
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const handleSearch = (searchQuery) => {
+    setSearchQuery(searchQuery);
+    console.log(searchQuery); // Handle search logic here
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.mainContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>Legasync</Text>
+          <Searchbar
+            placeholder="Search..."
+            onChangeText={handleSearch}
+            value={searchQuery}
+          ></Searchbar>
           <ModalSelector
             data={categories}
             initValue={selectedCategory}
