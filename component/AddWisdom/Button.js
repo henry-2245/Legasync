@@ -24,10 +24,12 @@ export default function Button({ label, theme, onPress}) {
         style={[
           styles.buttonContainer,
           {
-            marginTop: 10,
-            borderWidth: 3,
-            borderColor: "#ffd33d",
-            borderRadius: 18,
+            marginTop: 100,
+            padding: 10,
+            width: 150,
+            
+            
+            borderRadius: 20,
             backgroundColor: "grey", 
           },
         ]}
@@ -38,7 +40,7 @@ export default function Button({ label, theme, onPress}) {
         >
           <FontAwesome
             name="picture-o"
-            size={18}
+            size={15}
             color="#25292e"
             style={styles.buttonIcon}
           />

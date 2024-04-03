@@ -68,7 +68,7 @@ const Profile = ({ isYourOwnProfile }) => {
         }
 
         if (storedProfileImage !== null) {
-          setOtherProfileImage(storedProfileImage );
+          setOtherProfileImage(storedProfileImage);
         }
       } catch (error) {
         console.log("Error retrieving user data:", error);
@@ -145,12 +145,14 @@ const Profile = ({ isYourOwnProfile }) => {
     if (route.params && route.params.profileImage) {
       // Update the profile image only if a new image URI is received
       console.log("Received Profile Image URI:", route.params.profileImage);
+      AsyncStorage.setItem("userImage", route.params.profileImage)
       setUser((prevUser) => ({
         ...prevUser,
         profileImage: { uri: route.params.profileImage },
       }));
     }
   }, [route.params]);
+  
 
   useEffect(() => {
     if (route.params && route.params.occupation) {
@@ -163,6 +165,7 @@ const Profile = ({ isYourOwnProfile }) => {
 
   const handleClick = () => {
     navigation.navigate("LoginSignup");
+    
   };
   const handleEditProfile = () => {
     navigation.navigate("EditProfile", {

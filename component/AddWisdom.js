@@ -1,155 +1,133 @@
 import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Modal, View, Text, TextInput, Button, StyleSheet, ScrollView } from "react-native";
 import ModalSelector from "react-native-modal-selector";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Picker from "./AddWisdom/Picker";
-import "react-native-gesture-handler";
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from "@gorhom/bottom-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const AddWisdom = ({ visible, onClose, onSubmit }) => {
+const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
+  const navigation = useNavigation();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [medium, setMedium] = useState("");
+  const [articleText, setArticleText] = useState(""); // New state for article text input
 
-  const categories = [
-    { key: 0, label: "Technology" },
-    { key: 1, label: "Computer Science" },
-    { key: 2, label: "Scientific" },
-    // Add more categories as needed
-  ];
-
-  const mediums = [
-    { key: 0, label: "Voice Record" },
-    { key: 1, label: "Video" },
-    { key: 2, label: "Text" },
-    // Add more mediums as needed
-  ];
+  const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState("");
+  
+  const [categories, setCategories] = useState([]); // Initialize categories state
 
   useEffect(() => {
-    // Set initial values when the component mounts
     setCategory("Select Category");
     setMedium("Select Medium");
-  }, []); // Empty dependency array ensures the effect runs only once
+    getUsernameFromAsyncStorage();
+    getProfileImageFromAsyncStorage();
+    fetchCategories(); // Fetch categories data when component mounts
+  }, []);
+
+  const fetchCategories = () => {
+    // Fetch categories data here and update state
+    const fetchedCategories = [
+      { key: 0, label: "Technology" },
+      { key: 1, label: "Computer Science" },
+      { key: 2, label: "Scientific" },
+      // Add more categories as needed
+    ];
+    setCategories(fetchedCategories);
+  };
+
+  const getUsernameFromAsyncStorage = async () => {
+    const storedUsername = await AsyncStorage.getItem("username");
+    setUsername(storedUsername);
+  };
+
+  const getProfileImageFromAsyncStorage = async () => {
+    const storedProfileImage = await AsyncStorage.getItem("userImage");
+    setProfileImage(storedProfileImage);
+  };
+
+  const handleSubmit = async () => {
+    const data = await AsyncStorage.getItem("data");
+    if (title && category !== "Select Category" && username && data) {
+      const parsedData = JSON.parse(data);
+      let wisdomData = {
+        title,
+        author: { name: username, profileImage: { uri: profileImage }},
+        category,
+        medium: medium, // Pass the selected medium
+        likes: 0,
+        comments: [{ username: "", text: "" }],
+        saved: 0,
+  
+      };
+
+      if (medium === "Video") {
+        wisdomData = { ...wisdomData, video: parsedData };
+      } else if (medium === "Article") {
+        wisdomData = { ...wisdomData, article: articleText, image: parsedData };
+      }
+      console.log(wisdomData)
+
+      onAddWisdom(wisdomData);
+      navigation.navigate("TabNavigator");
+    } else {
+      alert("Please fill in all the required fields.");
+    }
+  };
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
-        }}
-      >
-        <View
-          style={{
-            height: "85%", // Adjust height as needed
-            width: "100%",
-            backgroundColor: "white",
-            borderRadius: 10,
-            padding: 20,
-            justifyContent: "space-between", // Align items with space between them
-          }}
-        >
-          {/* Modal content */}
-          <View>
-            <Text
-              style={{
-                fontSize: 30,
-                fontWeight: "bold",
-                marginBottom: 10,
-                textAlign: "center",
-                marginBottom: 15,
-                padding: 10,
-              }}
-            >
-              Add New Wisdom
-            </Text>
-            <TextInput
-              style={{
-                padding: 10,
-                borderWidth: 1,
-                borderRadius: 5,
-                borderColor: "#ccc",
-                marginBottom: 15,
-              }}
-              placeholder="Enter title of article"
-              value={title}
-              onChangeText={(text) => setTitle(text)}
-            />
-
-            {/* Use ModalSelector for category dropdown */}
-            <ModalSelector
-              data={categories}
-              initValue={category}
-              style={{
-                padding: 10,
-                borderRadius: 5,
-                borderColor: "#ccc",
-                marginBottom: 15,
-              }}
-              initValueTextStyle={{
-                color: category === "Select Category" ? "#808080" : "#000",
-              }}
-              selectTextStyle={{ color: "#000" }}
-              onChange={(option) => setCategory(option.label)}
-            />
-
-            {/* Use ModalSelector for medium dropdown */}
-            {/* <ModalSelector
-              data={mediums}
-              initValue={medium}
-              style={{
-                padding: 10,
-                borderRadius: 5,
-                borderColor: "#ccc",
-                marginBottom: 15,
-              }}
-              initValueTextStyle={{
-                color: medium === "Select Medium" ? "#808080" : "#000",
-              }}
-              selectTextStyle={{ color: "#000" }}
-              onChange={(option) => setMedium(option.label)}
-            /> */}
-          </View>
-
-          {/* Media Picker */}
-          <View 
-          style={{ 
-            flexDirection: "row",
-            
-            }}
-          >
-            <Picker></Picker>
-          </View>
-
-          {/* Buttons */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
-            <View style={{ width: 120 }}>
-              <Button
-                title="Cancel"
-                onPress={onClose}
-                color="#808080" // Adjust the color to match your design
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+        <View style={{ height: "82%", width: "90%", backgroundColor: "white", borderRadius: 10, padding: 20 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 26, fontWeight: "bold", marginBottom: 10, textAlign: "center", paddingVertical: 20 }}>Add New Wisdom</Text>
+              <TextInput style={{ padding: 10, borderWidth: 1, borderRadius: 5, borderColor: "#ccc", marginBottom: 15 }} placeholder="Enter title of article" value={title} onChangeText={(text) => setTitle(text)} />
+              <ModalSelector
+                data={categories}
+                initValue={category}
+                style={{ padding: 10, borderRadius: 5, borderColor: "#ccc", marginBottom: 15 }}
+                initValueTextStyle={{ color: category === "Select Category" ? "#808080" : "#000" }}
+                selectTextStyle={{ color: "#000" }}
+                onChange={(option) => setCategory(option.label)}
               />
-            </View>
-
-            <View style={{ width: 120 }}>
-              <Button
-                title="Post"
-                onPress={() => onSubmit({ title, category, medium })}
-                color="#f5ca31" // Adjust the color to match your design
+              <ModalSelector
+                data={[
+                  { key: 0, label: "Video" },
+                  { key: 1, label: "Article" },
+                  { key: 2, label: "Voice Record" },
+                ]}
+                initValue={medium}
+                style={{ padding: 10, borderRadius: 5, borderColor: "#ccc", marginBottom: 15 }}
+                initValueTextStyle={{ color: medium === "Select Medium" ? "#808080" : "#000" }}
+                selectTextStyle={{ color: "#000" }}
+                onChange={(option) => setMedium(option.label)}
               />
+              {(medium === "Video" || medium === "Article") && (
+                <View style={{ marginBottom: 15 }}>
+                  <Picker />
+                </View>
+              )}
+              {medium === "Article" && (
+                <TextInput
+                  style={{ padding: 10, borderWidth: 1, borderRadius: 5, borderColor: "#ccc", marginBottom: 15, minHeight: 200 }} // Increased minHeight for bigger textarea
+                  placeholder="Enter article text"
+                  value={articleText}
+                  onChangeText={(text) => setArticleText(text)}
+                  multiline={true}
+                  numberOfLines={4}
+                />
+              )}
+              <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                <View style={{ width: 120 }}>
+                  <Button title="Cancel" onPress={onClose} color="#808080" />
+                </View>
+                <View style={{ width: 120 }}>
+                  <Button title="Post" onPress={handleSubmit} color="#f5ca31" />
+                </View>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -157,5 +135,3 @@ const AddWisdom = ({ visible, onClose, onSubmit }) => {
 };
 
 export default AddWisdom;
-
-
