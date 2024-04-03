@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,13 +9,14 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
-import { Searchbar } from "react-native-paper";
 
 const Search = () => {
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
 
-  {/* for serach bar */}
+  {
+    /* for serach bar */
+  }
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleSearch = () => {
@@ -40,11 +41,6 @@ const Search = () => {
           <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
             <Text style={styles.searchButtonText}>Search</Text>
           </TouchableOpacity> */}
-          <Searchbar
-            placeholder="Search..."
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-          ></Searchbar>
         </View>
         <View style={styles.resultsContainer}>
           {/* Display search results here */}
@@ -142,7 +138,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     backgroundColor: "#f5f5f5",
-
+    borderRadius: 18,
     marginRight: 15,
   },
   searchButton: {
