@@ -117,8 +117,10 @@ const Home = () => {
     setIsAddPopupVisible(true);
   };
 
-  const handleAddPopupSubmit = (title) => {
+  const handleAddPopupSubmit = (wisdomData) => {
     setIsAddPopupVisible(false);
+    setArticles([...articles, wisdomData]);
+    console.log(articles)
     // Add logic for handling the submitted title
   };
 
@@ -192,6 +194,7 @@ const Home = () => {
           visible={isAddPopupVisible}
           onClose={() => setIsAddPopupVisible(false)}
           onSubmit={handleAddPopupSubmit}
+          onAddWisdom={handleAddPopupSubmit}
         />
       </View>
     </ScrollView>

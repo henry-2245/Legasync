@@ -12,7 +12,9 @@ import { Ionicons } from "@expo/vector-icons";
 import Wisdom from "../component/Wisdom";
 import CommentPopup from "../component/CommentPopup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+// import Video from 'react-native-video';
+import { Video } from "expo-av";
+import { Asset } from "expo-asset";
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
   const navigation = useNavigation();
@@ -147,12 +149,14 @@ const WisdomDetail = ({ route }) => {
 
   useEffect(() => {
     // Reset comments when article changes
-    
+
     setIsHearted(false);
     article.likes = initialLikeCount;
     setComments(article.comments || []);
-    setCommentPopupVisible(false)
+    setCommentPopupVisible(false);
   }, [article]);
+
+  const [status, setStatus] = React.useState({});
 
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
@@ -173,10 +177,37 @@ const WisdomDetail = ({ route }) => {
           </View>
         </TouchableOpacity>
       </View>
-      <Image source={article.image} style={styles.articleImage} />
+      {article.medium === "Video" ? (
+        <View style={styles.contentContainer}>
+          <Video
+          source={{uri : article.video.uri}}
+          style={styles.video}
+          useNativeControls
+          resizeMode="contain"
+          isLooping
+          onPlaybackStatusUpdate={setStatus}
+          shouldPlay
+          
+        />
+
+        </View>
+
+      ) : (
+        <View style={styles.contentContainer}>
+          <Image source={article.image} style={styles.articleImage} />
+
+        </View>
+
+      )}
 
       {/* Menu Bar */}
       <Text style={styles.title}>{article.title}</Text>
+      {article.medium === "Article" && (
+        <View style={styles.articleTextContainer}>
+          <Text style={styles.article}>{article.article}</Text>
+        </View>
+      )}
+
       <View style={styles.menuBar}>
         <TouchableOpacity
           style={styles.menuBarButton}
@@ -215,7 +246,6 @@ const WisdomDetail = ({ route }) => {
             comments={comments}
             onClose={handleCloseCommentPopup}
             setComments={setComments}
-            
           />
         )}
       </View>
@@ -255,10 +285,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 27,
     fontWeight: "bold",
     color: "white",
     marginTop: 40,
+    marginBottom: 20,
+  },
+  articleTextContainer: {
+    borderTopWidth: 3,
+    borderTopColor: "grey",
+    paddingLeft: 5,
+    paddingRight: 5,
+  },
+  article: {
+    fontSize: 18,
+    color: "white",
+    marginTop: 20,
     marginBottom: 40,
   },
   authorContainer: {
@@ -343,6 +385,18 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  video: {
+    width: '100%',
+    height: 300,
+    flex: 1,
+    alignSelf: "center",
+    backgroundColor: "black",
+  },
+  contentContainer:{
+    padding: 10,
+   
+
   },
 });
 
