@@ -37,9 +37,14 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const fetchCategories = () => {
     // Fetch categories data here and update state
     const fetchedCategories = [
-      { key: 0, label: "Technology" },
-      { key: 1, label: "Computer Science" },
-      { key: 2, label: "Scientific" },
+    { key: 0, label: "Career" },
+    { key: 1, label: "Personal Growth" },
+    { key: 2, label: "Relationship" },
+    { key: 3, label: "Health and Wellness" },
+    { key: 4, label: "Family" },
+    { key: 5, label: "Education" },
+    { key: 6, label: "Bussiness" },
+    { key: 7, label: "Spirituality" },
       // Add more categories as needed
     ];
     setCategories(fetchedCategories);
@@ -83,46 +88,46 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
 
       onAddWisdom(wisdomData);
 
-      // if (medium === "Article") {
-      //   let formData = new FormData();
-      //   const mimeType = mime.lookup(parsedData.uri);
-      //   formData.append(
-      //     "wisdom",
-      //     JSON.stringify({
-      //       title: title,
-      //       medium: medium,
-      //       article: articleText,
-      //       category: category,
-      //       wisdomOwner: username,
-      //     })
-      //   );
-      //   formData.append("imageFile", {
-      //     uri: parsedData.uri,
-      //     type: mimeType,
-      //     name: filename
+      if (medium === "Article") {
+        let formData = new FormData();
+        const mimeType = mime.lookup(parsedData.uri);
+        formData.append(
+          "wisdom",
+          JSON.stringify({
+            title: title,
+            medium: medium,
+            article: articleText,
+            category: category,
+            wisdomOwner: username,
+          })
+        );
+        formData.append("imageFile", {
+          uri: parsedData.uri,
+          type: mimeType,
+          name: filename
 
-      //   });
-      //   console.log("formData : ", JSON.stringify(formData))
-      //   console.log("formData2 : ", formData)
+        });
+        console.log("formData : ", JSON.stringify(formData))
+        console.log("formData2 : ", formData)
 
-      //   fetch("https://legasync.azurewebsites.net/wisdom/addArticle", {
-      //     method: "POST",
-      //     body: JSON.stringify(formData),
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   })
-      //   .then(response => response.json())
-      //   .then(responseJson => {
-      //     console.log("Response:", responseJson);
-      //     // Handle response as needed
-      //   })
-      //   .catch(error => {
-      //     console.error("Error:", error);
-      //     // Handle error as needed
-      //   });
+        fetch("http://192.168.10.109:8080/wisdom/addArticles", {
+          method: "POST",
+          body: JSON.stringify(formData),
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then(response => response.json())
+        .then(responseJson => {
+          console.log("Response:", responseJson);
+          // Handle response as needed
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          // Handle error as needed
+        });
     
-      // }
+      }
 
       navigation.navigate("TabNavigator");
     } else {

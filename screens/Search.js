@@ -9,19 +9,46 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import Wisdom from "../component/Wisdom";
 
 const Search = () => {
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
+  const [articles, setArticles] = useState([
+    {
+      title: "Surviving a Hollywood life",
+      author: {
+        name: "Abdul Abir",
+        profileImage: require("legasync/Images/Abdul.jpg"),
+      },
+      image: require("legasync/Images/pic2.png"),
+      category: "Technology",
+    },
+    {
+      title: "How to take risks",
+      author: {
+        name: "Mark Manson",
+        profileImage: require("legasync/Images/Mark.jpg"),
+      },
+      image: require("legasync/Images/pic3.png"),
+      category: "Business",
+    },
+  ]);
+ 
 
-  {
-    /* for serach bar */
-  }
+ 
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleSearch = () => {
     console.log(searchText); // Handle search logic here
   };
+  const chunkArray = (array, chunkSize) => {
+    return Array.from(
+      { length: Math.ceil(array.length / chunkSize) },
+      (_, index) => array.slice(index * chunkSize, (index + 1) * chunkSize)
+    );
+  };
+  const articlesInRows = chunkArray(articles, 2);
 
   const handleCategoryClick = (category) => {
     navigation.navigate("Home", { selectedCategory: category });
@@ -42,15 +69,12 @@ const Search = () => {
             <Text style={styles.searchButtonText}>Search</Text>
           </TouchableOpacity> */}
         </View>
-        <View style={styles.resultsContainer}>
-          {/* Display search results here */}
-        </View>
         <View style={styles.forYouContainer}>
-          <Text style={styles.forYouText}>{"Wisdoms for you"}</Text>
+          <Text style={styles.forYouText}>{"Categories for you"}</Text>
           <View style={styles.forYouContent}>
             <View style={styles.contentWrapper}>
               <TouchableOpacity
-                onPress={() => handleCategoryClick("Technology")}
+                onPress={() => handleCategoryClick("Career")}
                 style={{
                   flex: 1,
                   justifyContent: "center",
@@ -66,7 +90,80 @@ const Search = () => {
             </View>
             <View style={styles.contentWrapper}>
               <TouchableOpacity
-                onPress={() => handleCategoryClick("Computer Science")}
+                onPress={() => handleCategoryClick("Personal Growth")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/Personal-growth.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Personal Growth"}</Text>
+              </TouchableOpacity>
+            </View>
+            
+            
+          </View>
+
+          <View style={styles.forYouContent}>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Relationship")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/relationship.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Relationship"}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Health and Wellness")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/health.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Health and Wellness"}</Text>
+              </TouchableOpacity>
+            </View>
+            
+            
+          </View>
+          <View style={styles.forYouContent}>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Family")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/family.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Family"}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Education")}
                 style={{
                   flex: 1,
                   justifyContent: "center",
@@ -80,37 +177,67 @@ const Search = () => {
                 <Text style={styles.contentText}>{"Education"}</Text>
               </TouchableOpacity>
             </View>
+            
+            
           </View>
+          <View style={styles.forYouContent}>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Business")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/business.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Business"}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.contentWrapper}>
+              <TouchableOpacity
+                onPress={() => handleCategoryClick("Spirituality")}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={require("legasync/Images/spirituality.jpeg")}
+                  style={styles.contentImage}
+                />
+                <Text style={styles.contentText}>{"Spirituality"}</Text>
+              </TouchableOpacity>
+            </View>
+            
+            
+          </View>
+          
         </View>
 
         <View style={styles.trendingContainer}>
-          <Text style={styles.trendingText}>Trending right now</Text>
-          <TouchableOpacity style={styles.clickTrending}>
-            <Text style={styles.trendingItem}>
-              What is the Purpose of Having an Offspring?
-            </Text>
-            <Text style={styles.additionalText}>120 wisdoms</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.clickTrending}>
-            <Text style={styles.trendingItem}>Being a Zookeeper</Text>
-            <Text style={styles.additionalText}>100 wisdoms</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.clickTrending}>
-            <Text style={styles.trendingItem}>My crazy life in Ohio</Text>
-            <Text style={styles.additionalText}>80 wisdoms</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.clickTrending}>
-            <Text style={styles.trendingItem}>Footballer Mindset</Text>
-            <Text style={styles.additionalText}>60 wisdoms</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.clickTrending}>
-            <Text style={styles.trendingItem}>Being a superheroes</Text>
-            <Text style={styles.additionalText}>20 wisdoms</Text>
-          </TouchableOpacity>
+          <Text style={styles.trendingText}>Most liked Wisdom</Text>
+          <View style={styles.articlesContainer}>
+            {articlesInRows.map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.rowContainer}>
+                {row.map((article, index) => (
+                  <View style={styles.articleContainer} key={index}>
+                    <Wisdom
+                      key={index}
+                      article={article}
+                      onPress={() =>
+                        navigation.navigate("WisdomDetail", { article })
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -120,7 +247,7 @@ const Search = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#2F2D2D",
-    padding: 30,
+    padding: 20,
   },
   header: {
     flexDirection: "row",
@@ -159,27 +286,30 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   forYouText: {
+    marginTop: 10,
     fontSize: 22,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 10,
-    marginTop: "12%",
+    marginBottom: 20,
+
   },
   forYouContent: {
     flexDirection: "row",
     justifyContent: "space-between",
+
   },
   contentWrapper: {
     justifyContent: "space-between",
-    marginLeft: "8%",
-    marginRight: "8%",
+    marginLeft: "3%",
+    marginRight: "3%",
     marginTop: "5%",
+    padding: 5,
     alignItems: "center",
   },
   contentImage: {
     width: 150,
     height: 100,
-    objectFit: "contain",
+    objectFit: "cover",
     marginBottom: 5,
     borderRadius: 18,
   },
@@ -187,11 +317,16 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   trendingContainer: {
+    marginTop: 20,
+    borderTopWidth: 3,
+    borderTopColor: "grey",
     padding: 10,
+    
     backgroundColor: "#2F2D2D",
     paddingBottom: 30,
   },
   trendingText: {
+    marginTop: 30,
     fontSize: 22,
     fontWeight: "bold",
     color: "#fff", // Match text color from image
@@ -218,6 +353,34 @@ const styles = StyleSheet.create({
     padding: "2%",
 
     marginTop: 0,
+  },
+  articlesContainer: {
+    width: "50%",
+    marginBottom: 60,
+  },
+  articleContainer: {
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+
+    marginBottom: 10,
+  },
+  articlesContainer: {
+    width: "50%",
+    marginBottom: 60,
+  },
+  articleContainer: {
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+
+    marginBottom: 10,
   },
 });
 
