@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
     padding: "1%",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingBottom: 50,
   },
   rowContainer: {
     flexDirection: "row",

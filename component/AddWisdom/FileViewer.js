@@ -30,15 +30,16 @@ export default function FileViewer({ placeholderFileSource, selectedFile }) {
 
 const styles = StyleSheet.create({
   image: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 230,
     borderRadius: 18,
+    objectFit: 'contain'
   },
   video: {
-    width: 200,
-    height: 200,
+    width: 300,
     flex: 1,
     alignSelf: "center",
-    backgroundColor: "black",
+   
+    objectFit: 'contain'
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -6,7 +6,7 @@ import FileViewer from "./FileViewer";
 import Button from "./Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Picker = ({}) => {
+const Picker = ({ clearSelectedFile }) => {
   // const PlaceholderImage = require("legasync/Images/Grace.jpg");
   const PlaceholderVideo = {
     uri: null,
@@ -15,6 +15,7 @@ const Picker = ({}) => {
 
   // const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
 
   const pickMediaAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -32,6 +33,7 @@ const Picker = ({}) => {
       alert("You did not select any media.");
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -46,14 +48,14 @@ const Picker = ({}) => {
         </View>
        
       </View>
-      <View style={styles.footerContainer}>
+     
         <Button
           theme="primary"
           label="Choose a File"
           onPress={pickMediaAsync}
         />
         
-      </View>
+    
     </View>
   );
 };
@@ -64,13 +66,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f3f3",
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
+    padding: 20,
   },
   imageContainer: {
     
    
     flexGrow: 1,
-    height: 200,
+    height: 220,
     
   },
   fileContainer:{
@@ -83,10 +85,7 @@ const styles = StyleSheet.create({
   },
   
   footerContainer: {
-    flex: 1,
-    flexDirection: "row",
     
-    alignItems: "center",
    
   },
 });

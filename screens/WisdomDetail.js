@@ -15,10 +15,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // import Video from 'react-native-video';
 import { Video } from "expo-av";
 import { Asset } from "expo-asset";
+import { MaterialIcons } from '@expo/vector-icons';
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
   const navigation = useNavigation();
   const [initialLikeCount, setInitialLikeCount] = useState(article.likes);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+
   const [articles, setArticles] = useState([
     {
       title: "Surviving a Hollywood life",
@@ -158,6 +162,12 @@ const WisdomDetail = ({ route }) => {
 
   const [status, setStatus] = React.useState({});
 
+  const handlePressPlay = () => {
+    setIsPlaying(true);
+    setShowControls(true);
+  };
+
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <TouchableOpacity
@@ -183,12 +193,21 @@ const WisdomDetail = ({ route }) => {
           source={{uri : article.video.uri}}
           style={styles.video}
           useNativeControls
-          resizeMode="contain"
+          resizeMode="cover"
           isLooping
-          onPlaybackStatusUpdate={setStatus}
-          shouldPlay
+          shouldPlay={isPlaying}
+          onPlaybackStatusUpdate={status => {
+            if (status.isPlaying) {
+              setIsPlaying(true);
+            }
+          }}
           
         />
+        {!isPlaying && (
+          <TouchableOpacity style={styles.playButton} onPress={handlePressPlay}>
+            <MaterialIcons name="play-arrow" size={100} color="white" />
+          </TouchableOpacity>
+        )}
 
         </View>
 
@@ -388,7 +407,7 @@ const styles = StyleSheet.create({
   },
   video: {
     width: '100%',
-    height: 300,
+    height: 400,
     flex: 1,
     alignSelf: "center",
     backgroundColor: "black",
@@ -397,6 +416,13 @@ const styles = StyleSheet.create({
     padding: 10,
    
 
+  },
+  playButton: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    zIndex: 1,
   },
 });
 

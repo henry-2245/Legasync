@@ -20,6 +20,7 @@ import { TextInput } from "react-native-gesture-handler";
 
 const EditProfile = () => {
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const route = useRoute();
   const [selectedImage, setSelectedImage] = useState(
@@ -160,13 +161,36 @@ const EditProfile = () => {
 
         <View style={styles.bottomSection}>
           <View>
+            <Text style={styles.inputLabel}>Name</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+              placeholder="Update your Name"
+              placeholderTextColor="grey"
+            />
+          </View>
+          
+          <View>
+            <Text style={styles.inputLabel}>Bio</Text>
+            <TextInput
+              value={bio}
+              onChangeText={setBio}
+              style={styles.input}
+              placeholder="Enter your Bio"
+              placeholderTextColor="grey"
+            />
+          </View>
+
+          <View>
             <Text style={styles.inputLabel}>Username</Text>
             <TextInput
               value={username}
               onChangeText={setUsername}
               style={styles.input}
-              placeholder="Update your Username"
-              placeholderTextColor="grey"
+              // placeholder="Update your Username"
+              // placeholderTextColor="grey"
+              editable={false}
             />
           </View>
 
@@ -177,17 +201,6 @@ const EditProfile = () => {
               onChangeText={setEmail}
               style={styles.input}
               editable={false}
-            />
-          </View>
-
-          <View>
-            <Text style={styles.inputLabel}>Bio</Text>
-            <TextInput
-              value={bio}
-              onChangeText={setBio}
-              style={styles.input}
-              placeholder="Enter your Bio"
-              placeholderTextColor="grey"
             />
           </View>
 
@@ -202,7 +215,11 @@ const EditProfile = () => {
             </View>
           </TouchableOpacity>
         </View>
-        <Modal isVisible={isModalVisible} animationType="slide" transparent={true}> 
+        <Modal
+          isVisible={isModalVisible}
+          animationType="slide"
+          transparent={true}
+        >
           <View style={styles.modalContainer}>
             <Text style={styles.modalText}>Enter your password to confirm</Text>
             <TextInput
