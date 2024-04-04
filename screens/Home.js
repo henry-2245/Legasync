@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   Text,
+  TextInput,
 } from "react-native";
 import Wisdom from "../component/Wisdom.js";
 import TabNavigator from "../component/TabNavigator.js";
@@ -13,7 +14,7 @@ import ModalSelector from "react-native-modal-selector";
 import AddWisdom from "../component/AddWisdom.js";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Profile from "./Profile";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import Search from "./Search";
 import { Searchbar } from "react-native-paper";
 import NewAddWisdom from "./NewAddWisdom.js";
@@ -121,7 +122,7 @@ const Home = () => {
   const handleAddPopupSubmit = (wisdomData) => {
     setIsAddPopupVisible(false);
     setArticles([...articles, wisdomData]);
-    console.log(articles)
+    console.log(articles);
     // Add logic for handling the submitted title
   };
 
@@ -140,7 +141,9 @@ const Home = () => {
     //     onPress={() => navigation.navigate('WisdomDetail', { article })}
     //   />
 
-    {/* filter logic */}
+    {
+      /* filter logic */
+    }
     const filteredArticles =
       searchQuery === "" && selectedCategory === "All Categories"
         ? articles
@@ -189,11 +192,21 @@ const Home = () => {
       <View style={styles.mainContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>Legasync</Text>
-          <Searchbar
+          {/* <Searchbar
             placeholder="Search..."
             onChangeText={handleSearch}
             value={searchQuery}
-          ></Searchbar>
+          ></Searchbar> */}
+          <View style={styles.searchInput}>
+            <Feather name="search" size={24} color="black" />
+            <TextInput
+              style={styles.searchText}
+              placeholder="Search..."
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+          </View>
+
           <ModalSelector
             data={categories}
             initValue={selectedCategory}
@@ -345,6 +358,26 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "center",
     lineHeight: 30,
+  },
+  searchInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 3,
+    height: 45,
+    marginTop: 3,
+    paddingLeft: 10,
+    marginLeft: 10,
+    marginRight: 10,
+    borderRadius: 18,
+  },
+  searchText: {
+    flex: 1,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 18,
+    marginRight: 15,
   },
 });
 
