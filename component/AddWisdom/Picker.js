@@ -23,11 +23,14 @@ const Picker = ({ clearSelectedFile }) => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      
     });
 
     if (!result.canceled && result.assets.length > 0) {
       setSelectedFile(result.assets[0]);
+    
       await AsyncStorage.setItem("data", JSON.stringify(result.assets[0]));
+
 
     } else {
       alert("You did not select any media.");

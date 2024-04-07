@@ -5,6 +5,7 @@ import { Video } from "expo-av";
 import { MaterialIcons } from '@expo/vector-icons';
 
 const Wisdom = ({ article, onPress }) => {
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -138,11 +139,11 @@ const Wisdom = ({ article, onPress }) => {
     <TouchableOpacity onPress={onPress}>
       <View style={styles.article}>
         <View style={styles.imageContainer}>
-          {article.medium === "Video" ? (
+          {article.medium === "video" ? (
             <View style={styles.videoContainer}>
               <MaterialIcons name="play-arrow" size={50} color="white" style={styles.playIcon} />
               <Video
-                source={{ uri: article.video.uri }}
+                source={{ uri: article.urlvid}}
                 style={[styles.articleVideo, { borderRadius: 10 }]}
                 useNativeControls={false}
                 resizeMode="cover"
@@ -151,7 +152,7 @@ const Wisdom = ({ article, onPress }) => {
             </View>
           ) : (
             <Image
-              source={article.image}
+              source={{uri : article.urlpic}}
               style={[styles.articleImage, { borderRadius: 10 }]}
             />
           )}
@@ -161,14 +162,14 @@ const Wisdom = ({ article, onPress }) => {
             {article.title}
           </Text>
           <View style={styles.authorContainer}>
-            {article.author && article.author.profileImage && (
+            {article.wisdomOwner && article.urlpro && (
               <Image
-                source={article.author.profileImage}
+                source={{uri : article.urlpro}}
                 style={styles.profileImage}
               />
             )}
             <Text style={styles.articleAuthor}>
-              {article.author && article.author.name}
+              {article.wisdomOwner}
             </Text>
           </View>
         </View>

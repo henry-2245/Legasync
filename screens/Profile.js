@@ -14,6 +14,7 @@ import TabNavigator from "../component/TabNavigator";
 import FollowingPopup from "../component/FollowingPopup";
 import FollowerPopup from "../component/FollowerPopup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import WisdomCollection from "../component/Collection/WisdomCollection";
 
 const Profile = ({ isYourOwnProfile }) => {
   const [username, setUsername] = useState("");
@@ -28,6 +29,7 @@ const Profile = ({ isYourOwnProfile }) => {
         const storedUsername = await AsyncStorage.getItem("username");
         if (storedUsername !== null) {
           setUsername(storedUsername);
+          
           // Optionally update the user state with the retrieved username
           setUser((prevState) => ({
             ...prevState,
@@ -46,6 +48,7 @@ const Profile = ({ isYourOwnProfile }) => {
     // This useEffect listens for changes in the username parameter passed through navigation
     if (route.params && route.params.username) {
       setUsername(route.params.username);
+     
       // Optionally update the user state with the retrieved username
       setUser((prevState) => ({
         ...prevState,
@@ -97,40 +100,7 @@ const Profile = ({ isYourOwnProfile }) => {
     navigation.navigate("FollowerPopup", { isYourOwnProfile });
   };
 
-  const [articles, setArticles] = useState([
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Technology",
-    },
-    {
-      title: "How to take risks",
-      author: {
-        name: "Mark Manson",
-        profileImage: require("legasync/Images/Mark.jpg"),
-      },
-      image: require("legasync/Images/pic3.png"),
-      category: "Business",
-    },
-    // ... (more articles)
-  ]);
-
-  const [articles2, setArticles2] = useState([
-    {
-      title: "How to take risks",
-      author: {
-        name: "Mark Manson",
-        profileImage: require("legasync/Images/Mark.jpg"),
-      },
-      image: require("legasync/Images/pic3.png"),
-      category: "Business",
-    },
-    // ... (more articles)
-  ]);
+  const [articles, setArticles] = useState("");
 
   const [user, setUser] = useState({
     name: "",
@@ -140,6 +110,19 @@ const Profile = ({ isYourOwnProfile }) => {
     posts: 1,
     profileImage: require("legasync/Images/proImage.png"),
   });
+
+  useEffect(() => {
+    // Fetch data from your API endpoint
+    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
+      .then(response => response.json())
+      .then(data => {
+        setArticles(data); // Update articles state with fetched data
+        console.log("data get from", articles)
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
   useEffect(() => {
     if (route.params && route.params.profileImage) {
@@ -180,7 +163,6 @@ const Profile = ({ isYourOwnProfile }) => {
   };
 
   const articlesInRows = chunkArray(articles, 2);
-  const articles2InRows = chunkArray(articles2, 2);
   const optionContainerStyles = useMemo(() => {
     return [
       styles.optionContainer,
@@ -205,7 +187,7 @@ const Profile = ({ isYourOwnProfile }) => {
           {/* <Image source={typeof user.profileImage === 'string' ? { uri: user.profileImage } : user.profileImage} style={styles.profileImage} />
           <Text style={styles.name}>{user.name}</Text> */}
           <Image
-            source={isYourOwnProfile ? user.profileImage : otherProfileImage}
+            source={isYourOwnProfile ? user.profileImage : {uri : otherProfileImage}}
             style={styles.profileImage}
           />
           <Text style={styles.name}>
@@ -287,22 +269,8 @@ const Profile = ({ isYourOwnProfile }) => {
             ))}
           </View>
         ) : (
-          <View style={styles.articlesContainer}>
-            {articles2InRows.map((row, rowIndex) => (
-              <View key={rowIndex} style={styles.rowContainer}>
-                {row.map((article, index) => (
-                  <View style={styles.articleContainer} key={index}>
-                    <Wisdom
-                      key={index}
-                      article={article}
-                      onPress={() =>
-                        navigation.navigate("WisdomDetail", { article })
-                      }
-                    />
-                  </View>
-                ))}
-              </View>
-            ))}
+          <View style={styles.articles2Container}>
+            <WisdomCollection wisdom={articles}/>
           </View>
         )}
 
@@ -343,6 +311,11 @@ const styles = StyleSheet.create({
   articlesContainer: {
     width: "50%",
     marginBottom: 60,
+  },
+  articles2Container: {
+    flexDirection: "row",
+    justifyContent: 'center'
+   
   },
   articleContainer: {
     marginRight: 10,

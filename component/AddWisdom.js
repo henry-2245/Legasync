@@ -7,12 +7,21 @@ import {
   Button,
   StyleSheet,
   ScrollView,
+  Alert,
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Picker from "./AddWisdom/Picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import mime from 'react-native-mime-types';
+import mime from "react-native-mime-types";
+import { storage } from "../firebaseConfig.js";
+import {
+  ref,
+  uploadString,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { readAsStringAsync } from "expo-file-system";
 
 const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const navigation = useNavigation();
@@ -37,14 +46,14 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const fetchCategories = () => {
     // Fetch categories data here and update state
     const fetchedCategories = [
-    { key: 0, label: "Career" },
-    { key: 1, label: "Personal Growth" },
-    { key: 2, label: "Relationship" },
-    { key: 3, label: "Health and Wellness" },
-    { key: 4, label: "Family" },
-    { key: 5, label: "Education" },
-    { key: 6, label: "Bussiness" },
-    { key: 7, label: "Spirituality" },
+      { key: 0, label: "Career" },
+      { key: 1, label: "Personal Growth" },
+      { key: 2, label: "Relationship" },
+      { key: 3, label: "Health and Wellness" },
+      { key: 4, label: "Family" },
+      { key: 5, label: "Education" },
+      { key: 6, label: "Bussiness" },
+      { key: 7, label: "Spirituality" },
       // Add more categories as needed
     ];
     setCategories(fetchedCategories);
@@ -62,76 +71,63 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
 
   const handleSubmit = async () => {
     const data = await AsyncStorage.getItem("data");
+
     const parsedData = JSON.parse(data);
     const filename = parsedData.uri.substring(parsedData.uri.lastIndexOf("/") + 1);
-      console.log("DATA SENT :",parsedData)
-      console.log("file name ", filename)
-    
-    if (title && category !== "Select Category" && username && data) {
-      
-      let wisdomData = {
-        title,
-        author: { name: username, profileImage: { uri: profileImage } },
-        category,
-        medium: medium, // Pass the selected medium
-        likes: 0,
-        comments: [{ username: "", text: "" }],
-        saved: 0,
+    console.log("DATA SENT :", parsedData);
+
+    if (title && category !== "Select Category" && username) {
+      const Wisdom = {
+        title: title,
+        medium: "",
+        urlPic: "",
+        urlVid: "",
+        urlRec: "",
+        article: articleText,
+        category: category,
+        wisdomOwner: username,
       };
-
-      if (medium === "Video") {
-        wisdomData = { ...wisdomData, video: parsedData };
-      } else if (medium === "Article") {
-        wisdomData = { ...wisdomData, article: articleText, image: parsedData };
+      const response = await fetch(parsedData.uri);
+      if (!response.ok) {
+        throw new Error("Failed to fetch Blob");
       }
-      // console.log(wisdomData);
+      const blobData = await response.blob();
 
-      onAddWisdom(wisdomData);
+      if (parsedData.type === "image") {
+        Wisdom.medium = "article";
+        const imageRef = ref(storage, `images/${filename}`);
+        await uploadBytesResumable(imageRef, blobData);
 
-      if (medium === "Article") {
-        let formData = new FormData();
-        const mimeType = mime.lookup(parsedData.uri);
-        formData.append(
-          "wisdom",
-          JSON.stringify({
-            title: title,
-            medium: medium,
-            article: articleText,
-            category: category,
-            wisdomOwner: username,
-          })
-        );
-        formData.append("imageFile", {
-          uri: parsedData.uri,
-          type: mimeType,
-          name: filename
+        const imageUrl = await getDownloadURL(imageRef);
+        Wisdom.urlPic = imageUrl;
+      } else if (parsedData.type === "video") {
+        Wisdom.medium = "video";
+        const videoRef = ref(storage, `videos/${filename}`);
+        await uploadBytesResumable(videoRef, blobData);
 
-        });
-        console.log("formData : ", JSON.stringify(formData))
-        console.log("formData2 : ", formData)
-
-        fetch("http://192.168.10.109:8080/wisdom/addArticles", {
-          method: "POST",
-          body: JSON.stringify(formData),
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then(response => response.json())
-        .then(responseJson => {
-          console.log("Response:", responseJson);
-          // Handle response as needed
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          // Handle error as needed
-        });
-    
+        const videoUrl = await getDownloadURL(videoRef);
+        Wisdom.urlVid = videoUrl;
       }
+      console.log(Wisdom);
 
+      const result = await fetch("https://legasync.azurewebsites.net/wisdom/addWisdom", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(Wisdom),
+    });
+
+    const responseText = await result.text();
+    console.log("Response:", responseText);
+
+    if (responseText === "Success") {
       navigation.navigate("TabNavigator");
+      onAddWisdom(Wisdom)
     } else {
-      alert("Please fill in all the required fields.");
+      alert("failed to add Wisdom")
+    }
+        
     }
   };
 
@@ -212,14 +208,12 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                 }}
                 selectTextStyle={{ color: "#000" }}
                 onChange={(option) => {
-                  setMedium(option.label)
-
-    
+                  setMedium(option.label);
                 }}
               />
               {(medium === "Video" || medium === "Article") && (
                 <View style={{ marginBottom: 15 }}>
-                  <Picker  />
+                  <Picker />
                 </View>
               )}
               {medium === "Article" && (

@@ -14,26 +14,20 @@ import Wisdom from "../component/Wisdom";
 const Search = () => {
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
-  const [articles, setArticles] = useState([
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Technology",
-    },
-    {
-      title: "How to take risks",
-      author: {
-        name: "Mark Manson",
-        profileImage: require("legasync/Images/Mark.jpg"),
-      },
-      image: require("legasync/Images/pic3.png"),
-      category: "Business",
-    },
-  ]);
+  const [articles, setArticles] = useState("");
+
+  useEffect(() => {
+    // Fetch data from your API endpoint
+    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
+      .then(response => response.json())
+      .then(data => {
+        setArticles(data); // Update articles state with fetched data
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
  
 
  

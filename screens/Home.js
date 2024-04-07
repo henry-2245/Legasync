@@ -19,9 +19,13 @@ import Search from "./Search";
 import { Searchbar } from "react-native-paper";
 import NewAddWisdom from "./NewAddWisdom.js";
 
+
 const Home = () => {
   const Tab = createBottomTabNavigator();
   const navigation = useNavigation();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isAddPopupSubmitted, setIsAddPopupSubmitted] = useState(false);
+
   const route = useRoute();
   const [categories, setCategories] = useState([
     { key: 0, label: "All Categories" },
@@ -49,6 +53,23 @@ const Home = () => {
     //   selectedCategory("All Categories")
     // }
   }, [route.params]);
+  useEffect(() => {
+    // Refresh the component whenever isAddPopupSubmitted changes
+    setRefreshKey(prevKey => prevKey + 1);
+  }, [isAddPopupSubmitted]);
+
+  useEffect(() => {
+    // Fetch data from your API endpoint
+    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
+      .then(response => response.json())
+      .then(data => {
+        setArticles(data); // Update articles state with fetched data
+        console.log("data get from", articles)
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, [isAddPopupSubmitted]);
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
@@ -56,71 +77,7 @@ const Home = () => {
 
   
 
-  const [articles, setArticles] = useState([
-    {
-      title: "How computer data",
-      author: {
-        name: "Grace Grimes",
-        profileImage: require("legasync/Images/Grace.jpg"),
-      },
-      image: require("legasync/Images/pic1.png"),
-      category: "Education",
-      likes: 100,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User2", text: "I enjoyed reading this." },
-        { username: "User3", text: "What is up?" },
-      ],
-      saved: 0,
-    },
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Education",
-      likes: 10,
-      comments: [
-        { username: "User1", text: "Amazingg" },
-        { username: "User2", text: "I want thiss." },
-      ],
-      saved: 0,
-    },
-    {
-      title: "How to take risks",
-      author: {
-        name: "Mark Manson",
-        profileImage: require("legasync/Images/Mark.jpg"),
-      },
-      image: require("legasync/Images/pic3.png"),
-      category: "Business",
-      likes: 20,
-      comments: [
-        { username: "User1", text: "So Risky" },
-        { username: "User2", text: "I enjoyed risk." },
-      ],
-      saved: 0,
-    },
-    {
-      title: "How computer data",
-      author: {
-        name: "Grace Grimes",
-        profileImage: require("legasync/Images/Grace.jpg"),
-      },
-      image: require("legasync/Images/pic1.png"),
-      category: "Family",
-      likes: 100,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User2", text: "I enjoyed reading this." },
-        { username: "User3", text: "What is up?" },
-      ],
-      saved: 0,
-    },
-    // Add more articles...
-  ]);
+  const [articles, setArticles] = useState("");
 
   const [isAddPopupVisible, setIsAddPopupVisible] = useState(false);
 
@@ -130,9 +87,8 @@ const Home = () => {
 
   const handleAddPopupSubmit = (wisdomData) => {
     setIsAddPopupVisible(false);
-    setArticles([...articles, wisdomData]);
-    console.log(articles);
-    // Add logic for handling the submitted title
+    setIsAddPopupSubmitted(true); 
+  
   };
 
   {
@@ -143,22 +99,12 @@ const Home = () => {
   // };
 
   const renderArticles = () => {
-    // return filteredArticles.map((article, index) => (
-    //   <Wisdom
-    //     key={index}
-    //     article={article}
-    //     onPress={() => navigation.navigate('WisdomDetail', { article })}
-    //   />
-
-    {
-      /* filter logic */
-    }
     const filteredArticles =
       searchQuery === "" && selectedCategory === "All Categories"
         ? articles
         : articles.filter((article) =>
             (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              article.author.name
+              article.wisdomOwner
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase())) &&
             selectedCategory === "All Categories"
@@ -197,7 +143,7 @@ const Home = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} key={refreshKey}>
       <View style={styles.mainContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>Legasync</Text>

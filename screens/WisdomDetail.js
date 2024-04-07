@@ -7,109 +7,74 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import Wisdom from "../component/Wisdom";
 import CommentPopup from "../component/CommentPopup";
+import SaveToListPopup from "../component/SavedCollection/SaveToListPopup"; // Import the SaveToListPopup component
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// import Video from 'react-native-video';
 import { Video } from "expo-av";
-import { Asset } from "expo-asset";
 import { MaterialIcons } from '@expo/vector-icons';
+
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
   const navigation = useNavigation();
   const [initialLikeCount, setInitialLikeCount] = useState(article.likes);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
-
-  const [articles, setArticles] = useState([
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Technology",
-      likes: 10,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User4", text: "I enjoyed reading this." },
-      ],
-      saved: 0,
-    },
-    {
-      title: "How to take risks",
-      author: {
-        name: "Mark Manson",
-        profileImage: require("legasync/Images/Mark.jpg"),
-      },
-      image: require("legasync/Images/pic3.png"),
-      category: "Business",
-      likes: 20,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User3", text: "I enjoyed reading this." },
-      ],
-      saved: 0,
-    },
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Technology",
-      likes: 10,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User5", text: "I enjoyed reading this." },
-      ],
-      saved: 0,
-    },
-    {
-      title: "Surviving a Hollywood life",
-      author: {
-        name: "Abdul Abir",
-        profileImage: require("legasync/Images/Abdul.jpg"),
-      },
-      image: require("legasync/Images/pic2.png"),
-      category: "Technology",
-      likes: 10,
-      comments: [
-        { username: "User1", text: "Great article!" },
-        { username: "User9", text: "I enjoyed reading this." },
-        { username: "User19", text: "I enjoyed it." },
-      ],
-      saved: 0,
-    },
-
-    // Add more articles...
-  ]);
-  const [comments, setComments] = useState(article.comments || []);
+  const [articles, setArticles] = useState("");
+  const [comments, setComments] = useState([]);
   const [isHearted, setIsHearted] = useState(false);
+  const [isBookmark, setIsBookmark] = useState(false)
   const [commentPopupVisible, setCommentPopupVisible] = useState(false);
+  const [showSavePopup, setShowSavePopup] = useState(false); // State for controlling the visibility of SaveToListPopup
+  const existingLists = [
+    { id: 1, name: "Favorites" },
+    { id: 2, name: "To Read" },
+    { id: 3, name: "Watch Later" },
+    // More lists...
+  ];
+  
+
+  useEffect(() => {
+    // Fetch data from your API endpoint
+    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
+      .then(response => response.json())
+      .then(data => {
+        setArticles(data); // Update articles state with fetched data
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
   const handleHeartPress = () => {
     setIsHearted((prev) => !prev);
-    article.likes += isHearted ? -1 : 1;
+    article.likeAmount += isHearted ? -1 : 1;
   };
-  const handleProfilePress = async () => {
-    // Navigate to other profile
-    navigation.navigate("OtherProfile", {
-      isYourOwnProfile: false,
-    });
+  const handleBookmarkPress = () => {
+    setIsBookmark((prev) => !prev);
+    article.bookmarkAmount += isBookmark ? -1 : 1;
+    setShowSavePopup(true)
 
-    // Store user data to AsyncStorage
+  }
+
+  const handleProfilePress = async () => {
+    const username = (await AsyncStorage.getItem("username")).toString()
+    if(username === article.wisdomOwner){
+      navigation.navigate("Profile", {isYourOwnProfile: true})
+    }
+    else{
+      navigation.navigate("OtherProfile", {
+        isYourOwnProfile: false,
+      });
+    }
     try {
-      await AsyncStorage.setItem("other-username", article.author.name);
+      await AsyncStorage.setItem("other-username", article.wisdomOwner);
       await AsyncStorage.setItem(
         "other-profileImage",
-        String(article.author.profileImage)
+        article.urlpro
       );
-
       console.log("Data stored successfully");
     } catch (error) {
       console.log("Error storing data:", error);
@@ -117,24 +82,26 @@ const WisdomDetail = ({ route }) => {
   };
 
   const handleChatBubblePress = () => {
-    // If the comment popup is already visible, close it
-    if (commentPopupVisible) {
-      setCommentPopupVisible(false);
-    } else {
-      // Otherwise, show the comment popup
-      setCommentPopupVisible(true);
-    }
+    setCommentPopupVisible(!commentPopupVisible); // Toggle commentPopupVisible state
   };
 
   const handleCloseCommentPopup = (updatedComments) => {
     if (Array.isArray(updatedComments)) {
-      // Update the comments and hide the popup
       setComments(updatedComments);
     }
     setCommentPopupVisible(false);
   };
 
-  // Helper function to chunk the articles into rows
+  const handlePressPlay = () => {
+    setIsPlaying(true);
+    setShowControls(true);
+  };
+
+  const handleSaveToList = (listName) => {
+    // Implement logic for saving wisdom to the selected or created list
+    console.log('Saving wisdom to list:', listName);
+  };
+
   const chunkArray = (array, chunkSize) => {
     return Array.from(
       { length: Math.ceil(array.length / chunkSize) },
@@ -142,31 +109,19 @@ const WisdomDetail = ({ route }) => {
     );
   };
 
-  // Get the articles in chunks of two
   const articlesInRows = chunkArray(articles, 2);
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    // Scroll to the top when the article changes
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
   }, [article]);
 
   useEffect(() => {
-    // Reset comments when article changes
-
     setIsHearted(false);
     article.likes = initialLikeCount;
-    setComments(article.comments || []);
+    setComments([]);
     setCommentPopupVisible(false);
   }, [article]);
-
-  const [status, setStatus] = React.useState({});
-
-  const handlePressPlay = () => {
-    setIsPlaying(true);
-    setShowControls(true);
-  };
-
 
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
@@ -180,17 +135,17 @@ const WisdomDetail = ({ route }) => {
         <TouchableOpacity onPress={handleProfilePress}>
           <View style={styles.authorContainer}>
             <Image
-              source={article.author.profileImage}
+              source={{uri: article.urlpro}}
               style={styles.profileImage}
             />
-            <Text style={styles.authorName}>{article.author.name}</Text>
+            <Text style={styles.authorName}>{article.wisdomOwner}</Text>
           </View>
         </TouchableOpacity>
       </View>
-      {article.medium === "Video" ? (
+      {article.medium === "video" ? (
         <View style={styles.contentContainer}>
           <Video
-          source={{uri : article.video.uri}}
+          source={{uri : article.urlvid}}
           style={styles.video}
           useNativeControls
           resizeMode="cover"
@@ -213,15 +168,12 @@ const WisdomDetail = ({ route }) => {
 
       ) : (
         <View style={styles.contentContainer}>
-          <Image source={article.image} style={styles.articleImage} />
-
+          <Image source={{uri : article.urlpic}} style={styles.articleImage} />
         </View>
-
       )}
 
-      {/* Menu Bar */}
       <Text style={styles.title}>{article.title}</Text>
-      {article.medium === "Article" && (
+      {article.medium === "article" && (
         <View style={styles.articleTextContainer}>
           <Text style={styles.article}>{article.article}</Text>
         </View>
@@ -237,7 +189,7 @@ const WisdomDetail = ({ route }) => {
             size={26}
             color={isHearted ? "red" : "#E0E0E0"}
           />
-          <Text style={styles.menuBarText}>{article.likes || 0}</Text>
+          <Text style={styles.menuBarText}>{article.likeAmount || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBarButton}
@@ -245,12 +197,15 @@ const WisdomDetail = ({ route }) => {
         >
           <Ionicons name="chatbubbles-outline" size={26} color="#E0E0E0" />
           <Text style={styles.menuBarText}>
-            {comments ? comments.length : 0}
+            {article.comment ? article.comment : 0}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuBarButton}>
-          <Ionicons name="bookmark-outline" size={26} color="#E0E0E0" />
-          <Text style={styles.menuBarText}>{article.saved || 0}</Text>
+        <TouchableOpacity style={styles.menuBarButton} onPress={handleBookmarkPress}>
+          <Ionicons 
+          name={isBookmark ? "bookmark" : "bookmark-outline"} 
+          size={26} 
+          color={isBookmark ? "yellow" : "#E0E0E0"} />
+          <Text style={styles.menuBarText}>{article.bookmarkAmount || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBarButton}>
           <Ionicons name="share-social-outline" size={26} color="#E0E0E0" />
@@ -259,20 +214,25 @@ const WisdomDetail = ({ route }) => {
       </View>
 
       <Text style={styles.articleBody}>{article.body || ""}</Text>
-      <View style={{ marginTop: commentPopupVisible ? "5%" : 0 }}>
-        {commentPopupVisible && (
-          <CommentPopup
-            comments={comments}
-            onClose={handleCloseCommentPopup}
-            setComments={setComments}
-          />
-        )}
-      </View>
+
+      {commentPopupVisible && (
+        <CommentPopup
+          comments={[]}
+          onClose={handleCloseCommentPopup}
+          setComments={setComments}
+        />
+      )}
+
+      {showSavePopup && (
+        <SaveToListPopup onClose={() => setShowSavePopup(false)} onSave={handleSaveToList} existingLists={existingLists}/>
+      )}
+
       <View style={styles.moreText}>
         <View style={styles.discoverWrapper}>
           <Text style={styles.Discover}>More to explore</Text>
         </View>
       </View>
+
       <View style={styles.articlesContainer}>
         {articlesInRows.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.rowContainer}>
@@ -414,8 +374,6 @@ const styles = StyleSheet.create({
   },
   contentContainer:{
     padding: 10,
-   
-
   },
   playButton: {
     position: 'absolute',
