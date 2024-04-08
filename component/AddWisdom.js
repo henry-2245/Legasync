@@ -22,6 +22,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { readAsStringAsync } from "expo-file-system";
+import VoiceRecorder from "./Audio/VoiceRecorder";
 
 const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const navigation = useNavigation();
@@ -73,7 +74,9 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
     const data = await AsyncStorage.getItem("data");
 
     const parsedData = JSON.parse(data);
-    const filename = parsedData.uri.substring(parsedData.uri.lastIndexOf("/") + 1);
+    const filename = parsedData.uri.substring(
+      parsedData.uri.lastIndexOf("/") + 1
+    );
     console.log("DATA SENT :", parsedData);
 
     if (title && category !== "Select Category" && username) {
@@ -110,24 +113,26 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
       }
       console.log(Wisdom);
 
-      const result = await fetch("https://legasync.azurewebsites.net/wisdom/addWisdom", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(Wisdom),
-    });
+      const result = await fetch(
+        "https://legasync.azurewebsites.net/wisdom/addWisdom",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(Wisdom),
+        }
+      );
 
-    const responseText = await result.text();
-    console.log("Response:", responseText);
+      const responseText = await result.text();
+      console.log("Response:", responseText);
 
-    if (responseText === "Success") {
-      navigation.navigate("TabNavigator");
-      onAddWisdom(Wisdom)
-    } else {
-      alert("failed to add Wisdom")
-    }
-        
+      if (responseText === "Success") {
+        navigation.navigate("TabNavigator");
+        onAddWisdom(Wisdom);
+      } else {
+        alert("failed to add Wisdom");
+      }
     }
   };
 
@@ -232,6 +237,12 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                   multiline={true}
                   numberOfLines={4}
                 />
+              )}
+              {medium === "Voice Record" && (
+                <View style={{ marginBottom: 15 }}>
+                  <VoiceRecorder></VoiceRecorder>
+                  <Picker />
+                </View>
               )}
               <View
                 style={{ flexDirection: "row", justifyContent: "space-around" }}
