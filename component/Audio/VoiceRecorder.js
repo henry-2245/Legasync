@@ -34,6 +34,8 @@ export default function App() {
       file: recording.getURI(),
     });
 
+    console.log("Recording URI:", recording.getURI());
+
     setRecordings(allRecordings);
   }
 
