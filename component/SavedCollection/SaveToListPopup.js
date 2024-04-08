@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native-gesture-handler';
 
-const SaveToListPopup = ({ visible, onClose, onSave, existingLists }) => {
+const SaveToListPopup = ({ visible, onClose, onSave, onSaveList, existingLists }) => {
   const [creatingList, setCreatingList] = useState(false);
   const [listName, setListName] = useState('');
+  const [listDescription, setListDescription] = useState('');
   const [selectedLists, setSelectedLists] = useState([]);
 
   const handleSave = () => {
-    onSave(selectedLists);
-    setSelectedLists([]); // Clear selected lists
+    const uniqueCollectionIDs = new Set(selectedLists.map(list => list.collectionID));
+    const selectedCollectionIDs = Array.from(uniqueCollectionIDs);
+    onSave(selectedCollectionIDs);
+    setSelectedLists([]);
     onClose();
   };
 
@@ -18,12 +22,17 @@ const SaveToListPopup = ({ visible, onClose, onSave, existingLists }) => {
   };
 
   const handleSaveList = () => {
-    // Perform save action for the new list
-    // For example, add it to the existingLists array
-    const newList = { id: existingLists.length + 1, name: listName };
-    existingLists.push(newList);
+    // const newList = {
+    //   collectionID: existingLists.length + 1,
+    //   collectTitle: listName,
+    //   collectDescription: listDescription,
+    //   listWisdom: []
+    // };
+    // existingLists.push(newList);
     setCreatingList(false);
     setListName('');
+    setListDescription('');
+    onSaveList(listName, listDescription); // Call the onSaveList function with list title and description
   };
 
   return (
@@ -36,6 +45,7 @@ const SaveToListPopup = ({ visible, onClose, onSave, existingLists }) => {
               <Ionicons name="add" size={26} color="red" />
             </TouchableOpacity>
           </View>
+
           {creatingList ? (
             <View style={styles.createListContainer}>
               <TextInput
@@ -44,6 +54,12 @@ const SaveToListPopup = ({ visible, onClose, onSave, existingLists }) => {
                 onChangeText={setListName}
                 value={listName}
               />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter list description"
+                onChangeText={setListDescription}
+                value={listDescription}
+              />
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSaveList}>
                   <Text style={styles.buttonText}>Save</Text>
@@ -51,20 +67,30 @@ const SaveToListPopup = ({ visible, onClose, onSave, existingLists }) => {
               </View>
             </View>
           ) : (
-            <View>
+            <ScrollView>
+              <View>
               {existingLists.map((list) => (
                 <TouchableOpacity
-                  key={list.id}
+                  key={list.collectionID}
                   style={[styles.listItem, selectedLists.includes(list) && styles.selectedListItem]}
-                  onPress={() => setSelectedLists((prevLists) => [...prevLists, list])}
+                  onPress={() => {
+                    if (selectedLists.includes(list)) {
+                      setSelectedLists(prevLists => prevLists.filter(item => item !== list));
+                    } else {
+                      setSelectedLists(prevLists => [...prevLists, list]);
+                    }
+                  }}
                 >
-                  <Text>{list.name}</Text>
+                  <Text>{list.collectTitle}</Text>
                   {selectedLists.includes(list) && (
                     <Ionicons name="checkmark-circle" size={24} color="green" style={styles.checkIcon} />
                   )}
                 </TouchableOpacity>
               ))}
             </View>
+              
+            </ScrollView>
+            
           )}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
@@ -115,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedListItem: {
-    backgroundColor: '#e6f7ea', // Light green background for selected items
+    backgroundColor: '#e6f7ea',
   },
   checkIcon: {
     marginLeft: 10,
@@ -156,5 +182,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
+// Rest of the component remains the same
 
 export default SaveToListPopup;

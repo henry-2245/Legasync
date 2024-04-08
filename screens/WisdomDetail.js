@@ -14,7 +14,7 @@ import CommentPopup from "../component/CommentPopup";
 import SaveToListPopup from "../component/SavedCollection/SaveToListPopup"; // Import the SaveToListPopup component
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Video } from "expo-av";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
@@ -25,28 +25,57 @@ const WisdomDetail = ({ route }) => {
   const [articles, setArticles] = useState("");
   const [comments, setComments] = useState([]);
   const [isHearted, setIsHearted] = useState(false);
-  const [isBookmark, setIsBookmark] = useState(false)
+  const [isBookmark, setIsBookmark] = useState(false);
   const [commentPopupVisible, setCommentPopupVisible] = useState(false);
   const [showSavePopup, setShowSavePopup] = useState(false); // State for controlling the visibility of SaveToListPopup
+  const [collections, setCollections] = useState([]); // State to hold fetched collections
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const existingLists = [
     { id: 1, name: "Favorites" },
     { id: 2, name: "To Read" },
     { id: 3, name: "Watch Later" },
     // More lists...
   ];
-  
+
+  useEffect(() => {
+    // Fetch data from your API endpoint when the component mounts
+    fetchCollections();
+  }, []);
 
   useEffect(() => {
     // Fetch data from your API endpoint
-    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
-      .then(response => response.json())
-      .then(data => {
+    fetch("https://legasync.azurewebsites.net/wisdom/getAll")
+      .then((response) => response.json())
+      .then((data) => {
         setArticles(data); // Update articles state with fetched data
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
   }, []);
+
+  const fetchCollections = async () => {
+    try {
+      // Fetch collections based on the logged-in user's username
+      const username = await AsyncStorage.getItem("username");
+      console.log(username);
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/collection/getAllCollection`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: username,
+        }
+      );
+      const data = await response.json();
+      setCollections(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
+    }
+  };
 
   const handleHeartPress = () => {
     setIsHearted((prev) => !prev);
@@ -55,26 +84,21 @@ const WisdomDetail = ({ route }) => {
   const handleBookmarkPress = () => {
     setIsBookmark((prev) => !prev);
     article.bookmarkAmount += isBookmark ? -1 : 1;
-    setShowSavePopup(true)
-
-  }
+    setShowSavePopup(true);
+  };
 
   const handleProfilePress = async () => {
-    const username = (await AsyncStorage.getItem("username")).toString()
-    if(username === article.wisdomOwner){
-      navigation.navigate("Profile", {isYourOwnProfile: true})
-    }
-    else{
+    const username = (await AsyncStorage.getItem("username")).toString();
+    if (username === article.wisdomOwner) {
+      navigation.navigate("Profile", { isYourOwnProfile: true });
+    } else {
       navigation.navigate("OtherProfile", {
         isYourOwnProfile: false,
       });
     }
     try {
       await AsyncStorage.setItem("other-username", article.wisdomOwner);
-      await AsyncStorage.setItem(
-        "other-profileImage",
-        article.urlpro
-      );
+      await AsyncStorage.setItem("other-profileImage", article.urlpro);
       console.log("Data stored successfully");
     } catch (error) {
       console.log("Error storing data:", error);
@@ -97,9 +121,71 @@ const WisdomDetail = ({ route }) => {
     setShowControls(true);
   };
 
-  const handleSaveToList = (listName) => {
-    // Implement logic for saving wisdom to the selected or created list
-    console.log('Saving wisdom to list:', listName);
+  const handleSaveToList = async (collectionIDs) => {
+    const selectedCollections = collectionIDs.map((collectionID) => {
+      return {
+        collectionID: collectionID,
+        wisdomID: article.wisdomID, // Assuming article is defined in your scope
+      };
+    });
+    console.log(selectedCollections)
+  
+    try {
+      const response = await fetch('https://legasync.azurewebsites.net/collection/insertCollection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(selectedCollections),
+      });
+  
+      const responseData = await response.text();
+  
+      if (responseData === 'Success') {
+        alert('Add wisdom to collection success!!!');
+      } else {
+        console.log(responseData)
+        alert('Failed to add wisdom to collection');
+      }
+    } catch (error) {
+      console.error('Error adding wisdom to collection:', error);
+      alert('Failed to add wisdom to collection');
+    }
+  };
+
+  const handleSaveList = async (listTitle, listDescription) => {
+    
+    await fetchCollections();
+    const username = await AsyncStorage.getItem("username");
+    
+    console.log("List Title:", listTitle);
+    console.log("List Description:", listDescription);
+
+    
+
+    const response = await fetch(
+      `https://legasync.azurewebsites.net/collection/createCollection`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          collectTitle: listTitle,
+          collectDescript: listDescription,
+          collectOwner: username,
+        }),
+      }
+    );
+
+    // Handle response
+    const data = await response.text(); // Get response as text
+    if (data === "Success") {
+      console.log("Collection created successfully");
+      await fetchCollections();
+    } else {
+      console.error("Failed to create collection:", data);
+    }
   };
 
   const chunkArray = (array, chunkSize) => {
@@ -135,7 +221,7 @@ const WisdomDetail = ({ route }) => {
         <TouchableOpacity onPress={handleProfilePress}>
           <View style={styles.authorContainer}>
             <Image
-              source={{uri: article.urlpro}}
+              source={{ uri: article.urlpro }}
               style={styles.profileImage}
             />
             <Text style={styles.authorName}>{article.wisdomOwner}</Text>
@@ -145,30 +231,30 @@ const WisdomDetail = ({ route }) => {
       {article.medium === "video" ? (
         <View style={styles.contentContainer}>
           <Video
-          source={{uri : article.urlvid}}
-          style={styles.video}
-          useNativeControls
-          resizeMode="cover"
-          isLooping
-          shouldPlay={isPlaying}
-          onPlaybackStatusUpdate={status => {
-            if (status.isPlaying) {
-              setIsPlaying(true);
-            }
-          }}
-          
-        />
-        {!isPlaying && (
-          <TouchableOpacity style={styles.playButton} onPress={handlePressPlay}>
-            <MaterialIcons name="play-arrow" size={100} color="white" />
-          </TouchableOpacity>
-        )}
-
+            source={{ uri: article.urlvid }}
+            style={styles.video}
+            useNativeControls
+            resizeMode="cover"
+            isLooping
+            shouldPlay={isPlaying}
+            onPlaybackStatusUpdate={(status) => {
+              if (status.isPlaying) {
+                setIsPlaying(true);
+              }
+            }}
+          />
+          {!isPlaying && (
+            <TouchableOpacity
+              style={styles.playButton}
+              onPress={handlePressPlay}
+            >
+              <MaterialIcons name="play-arrow" size={100} color="white" />
+            </TouchableOpacity>
+          )}
         </View>
-
       ) : (
         <View style={styles.contentContainer}>
-          <Image source={{uri : article.urlpic}} style={styles.articleImage} />
+          <Image source={{ uri: article.urlpic }} style={styles.articleImage} />
         </View>
       )}
 
@@ -200,11 +286,15 @@ const WisdomDetail = ({ route }) => {
             {article.comment ? article.comment : 0}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuBarButton} onPress={handleBookmarkPress}>
-          <Ionicons 
-          name={isBookmark ? "bookmark" : "bookmark-outline"} 
-          size={26} 
-          color={isBookmark ? "yellow" : "#E0E0E0"} />
+        <TouchableOpacity
+          style={styles.menuBarButton}
+          onPress={handleBookmarkPress}
+        >
+          <Ionicons
+            name={isBookmark ? "bookmark" : "bookmark-outline"}
+            size={26}
+            color={isBookmark ? "yellow" : "#E0E0E0"}
+          />
           <Text style={styles.menuBarText}>{article.bookmarkAmount || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBarButton}>
@@ -224,7 +314,12 @@ const WisdomDetail = ({ route }) => {
       )}
 
       {showSavePopup && (
-        <SaveToListPopup onClose={() => setShowSavePopup(false)} onSave={handleSaveToList} existingLists={existingLists}/>
+        <SaveToListPopup
+          onClose={() => setShowSavePopup(false)}
+          onSave={handleSaveToList}
+          existingLists={collections}
+          onSaveList={handleSaveList}
+        />
       )}
 
       <View style={styles.moreText}>
@@ -366,19 +461,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   video: {
-    width: '100%',
+    width: "100%",
     height: 400,
     flex: 1,
     alignSelf: "center",
     backgroundColor: "black",
   },
-  contentContainer:{
+  contentContainer: {
     padding: 10,
   },
   playButton: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -50 }, { translateY: -50 }],
     zIndex: 1,
   },

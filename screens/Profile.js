@@ -11,6 +11,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Wisdom from "../component/Wisdom";
 import { ScrollView } from "react-native-gesture-handler";
 import TabNavigator from "../component/TabNavigator";
+import { useIsFocused } from "@react-navigation/native";
 import FollowingPopup from "../component/FollowingPopup";
 import FollowerPopup from "../component/FollowerPopup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,8 +20,48 @@ import WisdomCollection from "../component/Collection/WisdomCollection";
 const Profile = ({ isYourOwnProfile }) => {
   const [username, setUsername] = useState("");
   const [otherUsername, setOtherUsername] = useState("");
+  const [collections, setCollections] = useState([]);
+  const isFocused = useIsFocused();
+
   const [otherProfileImage, setOtherProfileImage] = useState(null);
   const route = useRoute();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem("username");
+        const storedOtherusername = await AsyncStorage.getItem(
+          "other-username"
+        );
+        setOtherUsername(storedOtherusername)
+        const fetchUsername = isYourOwnProfile
+          ? storedUsername
+          : storedOtherusername;
+        console.log(storedOtherusername);
+        const response = await fetch(
+          `https://legasync.azurewebsites.net/collection/getAllCollection`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain",
+            },
+            body: fetchUsername, // Use storedUsername instead of username directly
+          }
+        );
+        const data = await response.json();
+        setCollections(data);
+        console.log(fetchUsername);
+        console.log("profile", data);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      }
+    };
+
+    if (isFocused) {
+      fetchData();
+    }
+  }, [isFocused]);
+
 
   useEffect(() => {
     // Retrieve the initial username from AsyncStorage
@@ -29,7 +70,7 @@ const Profile = ({ isYourOwnProfile }) => {
         const storedUsername = await AsyncStorage.getItem("username");
         if (storedUsername !== null) {
           setUsername(storedUsername);
-          
+
           // Optionally update the user state with the retrieved username
           setUser((prevState) => ({
             ...prevState,
@@ -48,7 +89,7 @@ const Profile = ({ isYourOwnProfile }) => {
     // This useEffect listens for changes in the username parameter passed through navigation
     if (route.params && route.params.username) {
       setUsername(route.params.username);
-     
+
       // Optionally update the user state with the retrieved username
       setUser((prevState) => ({
         ...prevState,
@@ -61,14 +102,10 @@ const Profile = ({ isYourOwnProfile }) => {
     // Retrieve the initial username and profile image from AsyncStorage
     const getUserData = async () => {
       try {
-        const storedUsername = await AsyncStorage.getItem("other-username");
         const storedProfileImage = await AsyncStorage.getItem(
           "other-profileImage"
         );
-
-        if (storedUsername !== null) {
-          setOtherUsername(storedUsername);
-        }
+        
 
         if (storedProfileImage !== null) {
           setOtherProfileImage(storedProfileImage);
@@ -87,6 +124,7 @@ const Profile = ({ isYourOwnProfile }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [showFollowingPopup, setShowFollowingPopup] = useState(false);
   const [showFollowerPopup, setShowFollowerPopup] = useState(false);
+   // State to hold fetched collections
 
   const toggleFollow = () => {
     // Toggle the follow state and update the button text accordingly
@@ -111,19 +149,7 @@ const Profile = ({ isYourOwnProfile }) => {
     profileImage: require("legasync/Images/proImage.png"),
   });
 
-  useEffect(() => {
-    // Fetch data from your API endpoint
-    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
-      .then(response => response.json())
-      .then(data => {
-        setArticles(data); // Update articles state with fetched data
-        console.log("data get from", articles)
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
-
+  
   useEffect(() => {
     if (route.params && route.params.profileImage) {
       // Update the profile image only if a new image URI is received
@@ -172,6 +198,10 @@ const Profile = ({ isYourOwnProfile }) => {
     ];
   }, [isYourOwnProfile]);
 
+  const handleCollectionPress = (listWisdom) => {
+    navigation.navigate("Collection", { listWisdom });
+  };
+
   return (
     <ScrollView style={styles.scrollable}>
       <View style={styles.container}>
@@ -187,7 +217,9 @@ const Profile = ({ isYourOwnProfile }) => {
           {/* <Image source={typeof user.profileImage === 'string' ? { uri: user.profileImage } : user.profileImage} style={styles.profileImage} />
           <Text style={styles.name}>{user.name}</Text> */}
           <Image
-            source={isYourOwnProfile ? user.profileImage : {uri : otherProfileImage}}
+            source={
+              isYourOwnProfile ? user.profileImage : { uri: otherProfileImage }
+            }
             style={styles.profileImage}
           />
           <Text style={styles.name}>
@@ -240,14 +272,13 @@ const Profile = ({ isYourOwnProfile }) => {
           >
             <Text style={styles.buttonText2}>{"CREATED"}</Text>
           </TouchableOpacity>
-          {isYourOwnProfile && (
-            <TouchableOpacity
-              style={!displayCreated ? styles.selectedOption : styles.option}
-              onPress={() => setDisplayCreated(false)}
-            >
-              <Text style={styles.buttonText2}>{"SAVED"}</Text>
-            </TouchableOpacity>
-          )}
+
+          <TouchableOpacity
+            style={!displayCreated ? styles.selectedOption : styles.option}
+            onPress={() => setDisplayCreated(false)}
+          >
+            <Text style={styles.buttonText2}>{"SAVED"}</Text>
+          </TouchableOpacity>
         </View>
 
         {displayCreated ? (
@@ -270,7 +301,13 @@ const Profile = ({ isYourOwnProfile }) => {
           </View>
         ) : (
           <View style={styles.articles2Container}>
-            <WisdomCollection wisdom={articles}/>
+            {collections.map((collection) => (
+              <WisdomCollection
+                key={collection.collectionID}
+                wisdom={collection}
+                onPress={() => handleCollectionPress(collection)}
+              />
+            ))}
           </View>
         )}
 
@@ -313,9 +350,8 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   articles2Container: {
-    flexDirection: "row",
-    justifyContent: 'center'
-   
+    flexDirection: "column",
+    justifyContent: "center",
   },
   articleContainer: {
     marginRight: 10,
