@@ -240,12 +240,11 @@ const Profile = ({ isYourOwnProfile }) => {
       }
       
     };
-    if (isFocused) {
-      fetchAndSetArticles();
-    }
+    fetchAndSetArticles();
+    
 
    
-  }, [isYourOwnProfile, username, otherUsername, isFocused]);
+  }, [isYourOwnProfile, username, otherUsername]);
 
   const [user, setUser] = useState({});
   const fetchUserData = async () => {
@@ -277,6 +276,7 @@ const Profile = ({ isYourOwnProfile }) => {
     }
   };
   useEffect(() => {
+    fetchUserData();
     if (isFocused) {
       fetchUserData();
     }
