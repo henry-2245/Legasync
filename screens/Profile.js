@@ -26,6 +26,7 @@ const Profile = ({ isYourOwnProfile }) => {
   const [otherProfileImage, setOtherProfileImage] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [followings, setFollowings] = useState([]);
+  const [ownfollowings, setownFollowings] = useState([]);
   const route = useRoute();
 
 
@@ -130,10 +131,86 @@ const Profile = ({ isYourOwnProfile }) => {
   const [showFollowerPopup, setShowFollowerPopup] = useState(false);
    // State to hold fetched collections
 
-  const toggleFollow = () => {
-    // Toggle the follow state and update the button text accordingly
-    setIsFollowing(!isFollowing);
+  // const toggleFollow = () => {
+  //   // Toggle the follow state and update the button text accordingly
+  //   setIsFollowing(!isFollowing);
+  // };
+
+  const toggleFollow = async () => {
+    try {
+      const storedOtherUsername = await AsyncStorage.getItem("other-username");
+      if (storedOtherUsername) {
+        setOtherUsername(storedOtherUsername);
+        const requestBody = {
+          follower: username,
+          following: storedOtherUsername,
+        };
+        const response = await fetch(
+          "https://legasync.azurewebsites.net/user/followOrNot",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          }
+        );
+        const data = await response.text();
+        console.log(data)
+        if (data === "Success: Unfollow ") {
+          console.log("unfollow")
+          setIsFollowing(false); // Set isFollowing to false if unfollow is successful
+        } else if (data === "Success: Follow") {
+          setIsFollowing(true); // Set isFollowing to true if follow is successful
+          console.log("follow")
+        }
+        fetchUserData();
+        
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
   };
+  
+  useEffect(() => {
+    const fetchFollowingStatus = async () => {
+      try {
+        const storedOtherUsername = await AsyncStorage.getItem("other-username");
+        const username = await AsyncStorage.getItem("username")
+        if (storedOtherUsername) {
+          setOtherUsername(storedOtherUsername);
+  
+          // Fetch own followings
+          const ownFollowingsResponse = await fetch(
+            `https://legasync.azurewebsites.net/user/getFollowings`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "text/plain",
+              },
+              body: username,
+            }
+          );
+          const ownFollowingsData = await ownFollowingsResponse.json();
+          setownFollowings(ownFollowingsData);
+  
+          // Check if the other user is among the current user's followings
+          const isFollowingOtherUser = ownFollowingsData.some(
+            (following) => following.username === storedOtherUsername
+          );
+          setIsFollowing(isFollowingOtherUser);
+        }
+      } catch (error) {
+        console.error("Error fetching following status:", error);
+      }
+    };
+  
+    fetchFollowingStatus();
+    getFollowingFollowers();
+  }, [isFollowing]);
+  
+  
+
   const openFollowingPopup = () => {
     navigation.navigate("FollowingPopup", { isYourOwnProfile });
   };
@@ -171,87 +248,91 @@ const Profile = ({ isYourOwnProfile }) => {
   }, [isYourOwnProfile, username, otherUsername, isFocused]);
 
   const [user, setUser] = useState({});
+  const fetchUserData = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedOtherusername = await AsyncStorage.getItem(
+        "other-username"
+      );
+      
+      const fetchUsername = isYourOwnProfile
+        ? storedUsername
+        : storedOtherusername;
+
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/user/getUser`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: fetchUsername
+        }
+      );
+
+      const userData = await response.json();
+      setUser(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedOtherusername = await AsyncStorage.getItem(
-          "other-username"
-        );
-        
-        const fetchUsername = isYourOwnProfile
-          ? storedUsername
-          : storedOtherusername;
-  
-        const response = await fetch(
-          `https://legasync.azurewebsites.net/user/getUser`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-            },
-            body: fetchUsername
-          }
-        );
-  
-        const userData = await response.json();
-        setUser(userData);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-  
     if (isFocused) {
       fetchUserData();
     }
   }, [isFocused]);
 
+  const getFollowingFollowers = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedOtherUsername = await AsyncStorage.getItem("other-username");
+      const fetchUsername = isYourOwnProfile
+        ? storedUsername
+        : storedOtherUsername;
+
+      // Fetch followers
+      const followersResponse = await fetch(
+        `https://legasync.azurewebsites.net/user/getFollowers`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: fetchUsername,
+        }
+      );
+      const followersData = await followersResponse.json();
+      setFollowers(followersData);
+      console.log("followerList ", followers);
+
+      // Fetch followings
+      const followingsResponse = await fetch(
+        `https://legasync.azurewebsites.net/user/getFollowings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: fetchUsername,
+        }
+      );
+      const followingsData = await followingsResponse.json();
+      setFollowings(followingsData);
+      console.log("followingList ", followings);
+    } catch (error) {
+      console.error("Error fetching following/followers:", error);
+    }
+  };
+
+
   useEffect(() => {
-    const getFollowingFollowers = async () => {
-      try {
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedOtherUsername = await AsyncStorage.getItem(
-          "other-username"
-        );
-        const fetchUsername = isYourOwnProfile
-          ? storedUsername
-          : storedOtherUsername;
-
-        // Fetch followers
-        const followersResponse = await fetch(
-          `https://legasync.azurewebsites.net/user/getFollowers`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-            },
-            body: fetchUsername
-          }
-        );
-        const followersData = await followersResponse.json();
-        setFollowers(followersData);
-
-        // Fetch followings
-        const followingsResponse = await fetch(
-          `https://legasync.azurewebsites.net/user/getFollowings`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-            },
-            body: fetchUsername
-          }
-        );
-        const followingsData = await followingsResponse.json();
-        setFollowings(followingsData);
-      } catch (error) {
-        console.error("Error fetching following/followers:", error);
+    const fetchFollowingFollowers = async () => {
+      if (isFocused) {
+        await getFollowingFollowers();
       }
     };
 
-    if (isFocused) {
-      getFollowingFollowers();
-    }
+    fetchFollowingFollowers();
   }, [isFocused, isYourOwnProfile]);
   
 
