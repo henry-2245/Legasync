@@ -19,7 +19,6 @@ import Search from "./Search";
 import { Searchbar } from "react-native-paper";
 import NewAddWisdom from "./NewAddWisdom.js";
 
-
 const Home = () => {
   const Tab = createBottomTabNavigator();
   const navigation = useNavigation();
@@ -38,7 +37,6 @@ const Home = () => {
     { key: 7, label: "Business" },
     { key: 8, label: "Spirituality" },
   ]);
-  
 
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [sortBy, setSortBy] = useState("Default");
@@ -55,27 +53,25 @@ const Home = () => {
   }, [route.params]);
   useEffect(() => {
     // Refresh the component whenever isAddPopupSubmitted changes
-    setRefreshKey(prevKey => prevKey + 1);
+    setRefreshKey((prevKey) => prevKey + 1);
   }, [isAddPopupSubmitted]);
 
   useEffect(() => {
     // Fetch data from your API endpoint
-    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
-      .then(response => response.json())
-      .then(data => {
+    fetch("https://legasync.azurewebsites.net/wisdom/getAll")
+      .then((response) => response.json())
+      .then((data) => {
         setArticles(data); // Update articles state with fetched data
-        console.log("data get from", articles)
+        console.log("data get from", articles);
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
   }, [isAddPopupSubmitted]);
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
   };
-
-  
 
   const [articles, setArticles] = useState("");
 
@@ -87,8 +83,7 @@ const Home = () => {
 
   const handleAddPopupSubmit = (wisdomData) => {
     setIsAddPopupVisible(false);
-    setIsAddPopupSubmitted(true); 
-  
+    setIsAddPopupSubmitted(true);
   };
 
   {
@@ -100,18 +95,31 @@ const Home = () => {
 
   const renderArticles = () => {
     const filteredArticles =
-      searchQuery === "" && selectedCategory === "All Categories"
-        ? articles
-        : articles.filter((article) =>
-            (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              article.wisdomOwner
+      searchQuery === "" && selectedCategory !== "All Categories"
+        ? articles.filter(
+            (article) =>
+              (article.title
                 .toLowerCase()
-                .includes(searchQuery.toLowerCase())) &&
-            selectedCategory === "All Categories"
-              ? true
-              : article.category === selectedCategory
+                .includes(searchQuery.toLowerCase()) ||
+                article.wisdomOwner
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())) &&
+              (selectedCategory === "All Categories" ||
+                article.category === selectedCategory)
+          )
+        : searchQuery === "" && selectedCategory === "All Categories"
+        ? articles
+        : articles.filter(
+            (article) =>
+              (article.title
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+                article.wisdomOwner
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())) &&
+              (selectedCategory === "All Categories" ||
+                article.category === selectedCategory)
           );
-
     // ));
     const rows = [];
     for (let i = 0; i < filteredArticles.length; i += 2) {
@@ -163,38 +171,33 @@ const Home = () => {
           </View>
 
           <View style={styles.modalContainer}>
-          <ModalSelector
-            data={categories}
-            initValue={selectedCategory}
-            style={styles.dropdown}
-            initValueTextStyle={styles.dropdownText}
-            selectTextStyle={styles.dropdownText}
-            selectStyle={styles.dropdownSelect}
-            onChange={(option) => setSelectedCategory(option.label)}
-          />
-          {selectedCategory !== "All Categories" && (
             <ModalSelector
-              data={[
-                { key: "Default", label: "Default" },
-                { key: "Most Liked", label: "Most Liked" },
-                { key: "Most Viewed", label: "Most Viewed" },
-                { key: "Most Recent", label: "Most Recent" },
-                { key: "Oldest", label: "Oldest" },
-              ]}
-              initValue={sortBy}
+              data={categories}
+              initValue={selectedCategory}
               style={styles.dropdown}
               initValueTextStyle={styles.dropdownText}
               selectTextStyle={styles.dropdownText}
               selectStyle={styles.dropdownSelect}
-              onChange={(option) => handleSortChange(option.key)}
+              onChange={(option) => setSelectedCategory(option.label)}
             />
-          )}
-
+            {selectedCategory !== "All Categories" && (
+              <ModalSelector
+                data={[
+                  { key: "Default", label: "Default" },
+                  { key: "Most Liked", label: "Most Liked" },
+                  { key: "Most Viewed", label: "Most Viewed" },
+                  { key: "Most Recent", label: "Most Recent" },
+                  { key: "Oldest", label: "Oldest" },
+                ]}
+                initValue={sortBy}
+                style={styles.dropdown}
+                initValueTextStyle={styles.dropdownText}
+                selectTextStyle={styles.dropdownText}
+                selectStyle={styles.dropdownSelect}
+                onChange={(option) => handleSortChange(option.key)}
+              />
+            )}
           </View>
-
-        
-          
-
 
           <TouchableOpacity
             onPress={handleAddButtonPress}
@@ -225,14 +228,12 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: "15%",
   },
-  modalContainer:{
-    flexDirection: 'row',
-    
-  justifyContent: 'flex-start',
-  marginBottom: 10,
-  width: '100%'
-   
+  modalContainer: {
+    flexDirection: "row",
 
+    justifyContent: "flex-start",
+    marginBottom: 10,
+    width: "100%",
   },
   mainContainer: {},
   header: {
@@ -240,9 +241,8 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#2F2D2D",
     color: "white",
-    
+
     display: "flex",
-    
   },
   title: {
     fontSize: 30,
@@ -252,15 +252,12 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   dropdown: {
-   
     marginTop: 10,
     padding: 5,
-   
-   
   },
   dropdownSelect: {
-    display: 'row',
-    flexDirection: 'column',
+    display: "row",
+    flexDirection: "column",
     backgroundColor: "#E0E0E0",
     alignItems: "center",
     borderRadius: 20,
