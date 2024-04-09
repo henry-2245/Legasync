@@ -17,16 +17,27 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Modal from "react-native-modal";
 import { TextInput } from "react-native-gesture-handler";
+import { storage } from "../firebaseConfig.js";
+import {
+  ref,
+  uploadString,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 const EditProfile = () => {
   const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
+
+  
   const [email, setEmail] = useState("");
   const route = useRoute();
+  const userData = route.params?.userData; 
+  // console.log("user data", userData)
   const [selectedImage, setSelectedImage] = useState(
-    route.params?.profileImage || ""
+    userData.urlPro || ""
   );
-  const [bio, setBio] = useState(route.params.bio || "");
+  const [name, setName] = useState(userData.name || "");
+  const [bio, setBio] = useState( userData.bio|| "");
   const [isModalVisible, setModalVisible] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -70,21 +81,81 @@ const EditProfile = () => {
     setSelectedImage(uri);
   };
 
+  // const handleSavePress = async () => {
+  //   try {
+  //     await AsyncStorage.setItem("username", username);
+  //     console.log("Username updated successfully:", username);
+  //   } catch (error) {
+  //     console.log("Error updating username:", error);
+  //   }
+  //   // Pass the selected image URI back to the Profile component
+  //   console.log("Selected Image URI:", selectedImage);
+  //   navigation.navigate("Profile", {
+  //     profileImage: selectedImage,
+  //     occupation: bio,
+  //     username: username,
+  //   });
+  // };
+
   const handleSavePress = async () => {
-    try {
-      await AsyncStorage.setItem("username", username);
-      console.log("Username updated successfully:", username);
-    } catch (error) {
-      console.log("Error updating username:", error);
-    }
-    // Pass the selected image URI back to the Profile component
-    console.log("Selected Image URI:", selectedImage);
-    navigation.navigate("Profile", {
-      profileImage: selectedImage,
-      occupation: bio,
+    console.log("hey", selectedImage);
+    const filename = selectedImage.substring(selectedImage.lastIndexOf("/") + 1);
+  
+    const User = {
       username: username,
-    });
+      name: name,
+      bio: bio,
+      urlPro: "",
+    };
+  
+    try {
+      if (selectedImage !== userData.urlPro) {
+        console.log("image is change", selectedImage)
+        const responseblob = await fetch(selectedImage);
+        if (!responseblob.ok) {
+          throw new Error("Failed to fetch Blob");
+        }
+        
+        const blobData = await responseblob.blob();
+  
+        const imageRef = ref(storage, `profileImages/${filename}`);
+        await uploadBytesResumable(imageRef, blobData);
+        const imageUrl = await getDownloadURL(imageRef);
+        User.urlPro = imageUrl;
+      } else {
+        // If the selectedImage is the same as the current profile image,
+        // directly set the urlPro field to the selectedImage URL
+        User.urlPro = selectedImage;
+      }
+      console.log("fetchdata :", User);
+  
+      const response = await fetch(
+        "https://legasync.azurewebsites.net/user/editProfile",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(User),
+        }
+      );
+  
+      const data = await response.text();
+  
+      if (data === "success") {
+        console.log("Profile updated successfully");
+        navigation.navigate("Profile");
+      } else {
+        console.log("Failed to update profile:", data);
+        // Handle the case when the API call fails
+      }
+    } catch (error) {
+      console.log("Error updating profile:", error);
+      // Handle any network errors
+    }
   };
+  
+  
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);

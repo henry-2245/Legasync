@@ -71,7 +71,7 @@ const Collection = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 25,
+    padding: 10,
     paddingTop: 80,
     backgroundColor: "#2F2D2D",
   },
@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   },
   textContainer:{
     paddingVertical: 30,
+    paddingHorizontal: 10,
 
   },
   wisdomContainer: {

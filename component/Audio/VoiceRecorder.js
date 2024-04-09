@@ -1,8 +1,9 @@
 import React from "react";
 import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
 import { Audio } from "expo-av";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function App() {
+export default function VoiceRecorder() {
   const [recording, setRecording] = React.useState();
   const [recordings, setRecordings] = React.useState([]);
 
@@ -33,8 +34,9 @@ export default function App() {
       duration: getDurationFormatted(status.durationMillis),
       file: recording.getURI(),
     });
-
+    console.log("Recording URI:", recording);
     console.log("Recording URI:", recording.getURI());
+    AsyncStorage.setItem("VoiceURI",recording.getURI() )
 
     setRecordings(allRecordings);
   }

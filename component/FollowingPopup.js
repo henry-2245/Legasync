@@ -1,22 +1,23 @@
-// FollowingPopup.js
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 
-const FollowingPopup = ({ isYourOwnProfile, onClose, visible }) => {
-  const [followingList, setFollowingList] = useState([
-    { id: 1, username: 'user1', profileImage: require('legasync/Images/Grace.jpg'), isFollowing: true },
-    { id: 2, username: 'user2', profileImage: require('legasync/Images/Mark.jpg'), isFollowing: false },
-    // Add more users
-  ]);
+const FollowingPopup = ({ isYourOwnProfile, onClose, visible, followingList: propFollowingList }) => {
+  const [followingList, setFollowingList] = useState([]);
+
+  useEffect(() => {
+    // Set the following list only if it's not already set
+    setFollowingList(propFollowingList);
+    console.log(propFollowingList)
+  }, [propFollowingList]);
 
   const handleToggleFollow = (index) => {
+    // Implement logic to toggle follow status if needed
+    console.log(`Toggle follow for ${followingList[index].username}`);
+
     // Update the list and remove the user at the specified index
     const updatedList = [...followingList];
     updatedList.splice(index, 1);
     setFollowingList(updatedList);
-
-    // Implement logic to toggle follow status if needed
-    console.log(`Toggle follow for ${followingList[index].username}`);
   };
 
   return (
@@ -24,10 +25,10 @@ const FollowingPopup = ({ isYourOwnProfile, onClose, visible }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.title}>Following</Text>
-          {followingList.map((user, index) => (
+          {propFollowingList.map((user, index) => (
             <View key={index} style={styles.userContainer}>
               <View style={styles.userInfo}>
-                <Image source={user.profileImage} style={styles.profileImage} />
+                <Image source={{ uri: user.urlpro }} style={styles.profileImage} />
                 <Text style={styles.username}>{user.username}</Text>
               </View>
               {isYourOwnProfile && (
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: '80%',
-    backgroundColor: 'white',
+    backgroundColor: '#d3d3d3',
     borderRadius: 10,
     padding: 20,
   },
@@ -82,6 +83,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 10,
+    objectFit: 'cover'
   },
   username: {
     fontSize: 16,

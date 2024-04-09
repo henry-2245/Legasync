@@ -24,7 +24,11 @@ const Profile = ({ isYourOwnProfile }) => {
   const isFocused = useIsFocused();
 
   const [otherProfileImage, setOtherProfileImage] = useState(null);
+  const [followers, setFollowers] = useState([]);
+  const [followings, setFollowings] = useState([]);
   const route = useRoute();
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,15 +143,118 @@ const Profile = ({ isYourOwnProfile }) => {
   };
 
   const [articles, setArticles] = useState("");
+  const [articleCount, setArticleCount] = useState(0);
 
-  const [user, setUser] = useState({
-    name: "",
-    occupation: "",
-    followers: 13400,
-    following: 1462,
-    posts: 1,
-    profileImage: require("legasync/Images/proImage.png"),
-  });
+  useEffect(() => {
+    const fetchAndSetArticles = async () => {
+      try {
+        const response = await fetch(
+          "https://legasync.azurewebsites.net/wisdom/getAll"
+        );
+        const data = await response.json();
+        const sortedArticles = data.filter(
+          (article) =>
+            article.wisdomOwner === (isYourOwnProfile ? username : otherUsername)
+        );
+        setArticles(sortedArticles);
+        setArticleCount(sortedArticles.length);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      }
+      
+    };
+    if (isFocused) {
+      fetchAndSetArticles();
+    }
+
+   
+  }, [isYourOwnProfile, username, otherUsername, isFocused]);
+
+  const [user, setUser] = useState({});
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem("username");
+        const storedOtherusername = await AsyncStorage.getItem(
+          "other-username"
+        );
+        
+        const fetchUsername = isYourOwnProfile
+          ? storedUsername
+          : storedOtherusername;
+  
+        const response = await fetch(
+          `https://legasync.azurewebsites.net/user/getUser`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain",
+            },
+            body: fetchUsername
+          }
+        );
+  
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    if (isFocused) {
+      fetchUserData();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    const getFollowingFollowers = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem("username");
+        const storedOtherUsername = await AsyncStorage.getItem(
+          "other-username"
+        );
+        const fetchUsername = isYourOwnProfile
+          ? storedUsername
+          : storedOtherUsername;
+
+        // Fetch followers
+        const followersResponse = await fetch(
+          `https://legasync.azurewebsites.net/user/getFollowers`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain",
+            },
+            body: fetchUsername
+          }
+        );
+        const followersData = await followersResponse.json();
+        setFollowers(followersData);
+
+        // Fetch followings
+        const followingsResponse = await fetch(
+          `https://legasync.azurewebsites.net/user/getFollowings`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain",
+            },
+            body: fetchUsername
+          }
+        );
+        const followingsData = await followingsResponse.json();
+        setFollowings(followingsData);
+      } catch (error) {
+        console.error("Error fetching following/followers:", error);
+      }
+    };
+
+    if (isFocused) {
+      getFollowingFollowers();
+    }
+  }, [isFocused, isYourOwnProfile]);
+  
+
 
   
   useEffect(() => {
@@ -176,8 +283,7 @@ const Profile = ({ isYourOwnProfile }) => {
   };
   const handleEditProfile = () => {
     navigation.navigate("EditProfile", {
-      profileImage: user.profileImage.uri,
-      bio: user.occupation,
+     userData: user
     });
   };
 
@@ -218,14 +324,14 @@ const Profile = ({ isYourOwnProfile }) => {
           <Text style={styles.name}>{user.name}</Text> */}
           <Image
             source={
-              isYourOwnProfile ? user.profileImage : { uri: otherProfileImage }
+              isYourOwnProfile ? {uri: user.urlPro} : { uri: user.urlPro }
             }
             style={styles.profileImage}
           />
           <Text style={styles.name}>
-            {isYourOwnProfile ? user.name : otherUsername}
+            {isYourOwnProfile ? user.username : user.username}
           </Text>
-          <Text style={styles.occupation}>{user.occupation}</Text>
+          <Text style={styles.occupation}>{user.bio}</Text>
         </View>
 
         <View style={styles.statsContainer}>
@@ -243,12 +349,12 @@ const Profile = ({ isYourOwnProfile }) => {
               onPress={() => setShowFollowingPopup(true)}
               style={{ textAlign: "center", flex: 1, alignItems: "center" }}
             >
-              <Text style={styles.statsNumber}>{user.following}</Text>
+              <Text style={styles.statsNumber}>{user.followings}</Text>
               <Text style={styles.statsLabel}>Following</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.statsRow}>
-            <Text style={styles.statsNumber}>{user.posts}</Text>
+            <Text style={styles.statsNumber}>{articleCount}</Text>
             <Text style={styles.statsLabel}>Posts</Text>
           </View>
         </View>
@@ -322,12 +428,14 @@ const Profile = ({ isYourOwnProfile }) => {
           <FollowingPopup
             isYourOwnProfile={isYourOwnProfile}
             onClose={() => setShowFollowingPopup(false)}
+            followingList={followings}
           />
         )}
         {showFollowerPopup && (
           <FollowerPopup
             isYourOwnProfile={isYourOwnProfile}
             onClose={() => setShowFollowerPopup(false)}
+            followersList={followers}
           />
         )}
       </View>
@@ -472,7 +580,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   optionContainerOtherProfile: {
-    justifyContent: "center",
+    justifyContent: "space-between",
   },
   backButton: {
     marginLeft: 10,

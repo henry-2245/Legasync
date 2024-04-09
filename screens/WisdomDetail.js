@@ -15,6 +15,9 @@ import SaveToListPopup from "../component/SavedCollection/SaveToListPopup"; // I
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Video } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Audio } from "expo-av"; 
+import VoiceRecorder from "../component/Audio/VoiceRecorder";
+import AudioPlayer from "../component/Audio/AudioPlayer";
 
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
@@ -152,6 +155,10 @@ const WisdomDetail = ({ route }) => {
       alert('Failed to add wisdom to collection');
     }
   };
+  
+  
+
+  
 
   const handleSaveList = async (listTitle, listDescription) => {
     
@@ -209,6 +216,8 @@ const WisdomDetail = ({ route }) => {
     setCommentPopupVisible(false);
   }, [article]);
 
+  
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <TouchableOpacity
@@ -263,6 +272,12 @@ const WisdomDetail = ({ route }) => {
         <View style={styles.articleTextContainer}>
           <Text style={styles.article}>{article.article}</Text>
         </View>
+      )}
+      {article.medium === 'voice' &&(
+        <View style={styles.articleTextContainer}>
+        <AudioPlayer uri={article.urlrec}></AudioPlayer>
+      </View>
+
       )}
 
       <View style={styles.menuBar}>

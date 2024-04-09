@@ -46,6 +46,7 @@
     "react-native-screens": "~3.22.0",
     "react-native-thumbnail": "^1.1.3",
     "react-native-thumbnail-video": "^0.1.2",
+    "react-native-track-player": "^4.1.1",
     "react-native-vector-icons": "^10.0.3",
     "react-native-video": "^5.2.1",
     "react-native-video-thumbnails": "^0.0.0",

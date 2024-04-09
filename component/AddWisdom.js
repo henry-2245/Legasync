@@ -74,6 +74,8 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
     const data = await AsyncStorage.getItem("data");
 
     const parsedData = JSON.parse(data);
+    const voiceData = await AsyncStorage.getItem("VoiceURI");
+    const voiceName = voiceData.substring(voiceData.lastIndexOf("/") + 1);
     const filename = parsedData.uri.substring(
       parsedData.uri.lastIndexOf("/") + 1
     );
@@ -100,9 +102,23 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
         Wisdom.medium = "article";
         const imageRef = ref(storage, `images/${filename}`);
         await uploadBytesResumable(imageRef, blobData);
-
         const imageUrl = await getDownloadURL(imageRef);
         Wisdom.urlPic = imageUrl;
+
+        if (medium === "Voice Record") {
+          Wisdom.medium = "voice";
+          const response = await fetch(voiceData);
+          if (!response.ok) {
+            throw new Error("Failed to fetch Blob");
+          }
+          const blobData = await response.blob();
+         
+          const voiceRef = ref(storage, `voice/${voiceName}`);
+          await uploadBytesResumable(voiceRef, blobData);
+
+          const voiceUrl = await getDownloadURL(voiceRef);
+          Wisdom.urlRec = voiceUrl;
+        }
       } else if (parsedData.type === "video") {
         Wisdom.medium = "video";
         const videoRef = ref(storage, `videos/${filename}`);
@@ -111,6 +127,7 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
         const videoUrl = await getDownloadURL(videoRef);
         Wisdom.urlVid = videoUrl;
       }
+
       console.log(Wisdom);
 
       const result = await fetch(
