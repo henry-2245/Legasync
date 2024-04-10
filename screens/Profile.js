@@ -77,7 +77,7 @@ const Profile = ({ isYourOwnProfile }) => {
         console.log("Error retrieving username:", error);
       }
     };
-     fetchAndSetArticles(); 
+     
     getUsername();
     
   }, []);
@@ -196,7 +196,7 @@ const Profile = ({ isYourOwnProfile }) => {
         console.error("Error fetching following status:", error);
       }
     };
-    fetchAndSetArticles();
+
 
     fetchFollowingStatus();
     getFollowingFollowers();
@@ -233,6 +233,11 @@ const Profile = ({ isYourOwnProfile }) => {
       console.error("Error fetching articles:", error);
     }
   };
+
+  useEffect(() => {
+    fetchAndSetArticles();
+  }, [articles, articleCount]);
+
 
 
   const [user, setUser] = useState({});

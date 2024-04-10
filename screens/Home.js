@@ -92,6 +92,14 @@ const Home = () => {
     setRefreshKey((prevKey) => prevKey + 1);
   }, [isAddPopupSubmitted, route.params, selectedCategory, sortBy]);
 
+  useEffect(() => {
+    const { selectedCategory: routeCategory } = route.params || {};
+    if (routeCategory) {
+      setSelectedCategory(routeCategory);
+    }
+  }, [route.params]);
+
+
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
   };
