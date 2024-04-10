@@ -170,22 +170,29 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
         >
           <View
             style={{
-              height: "82%",
-              width: "90%",
+              height: "100%",
+              width: "100%",
               backgroundColor: "white",
               borderRadius: 10,
               padding: 20,
             }}
           >
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1 }}
+            >
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    fontSize: 26,
+                    marginTop: 50,
                     fontWeight: "bold",
+                    color: "black",
                     marginBottom: 10,
                     textAlign: "center",
-                    paddingVertical: 20,
+                    paddingVertical: 40,
+                    paddingHorizontal: 20,
+                    fontSize: 28, // Set font size to 25
                   }}
                 >
                   Add New Wisdom
@@ -196,7 +203,8 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                     borderWidth: 1,
                     borderRadius: 5,
                     borderColor: "#ccc",
-                    marginBottom: 15,
+                    marginBottom: 40,
+                    fontSize: 23,
                   }}
                   placeholder="Enter title of article"
                   value={title}
@@ -206,10 +214,10 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                   data={categories}
                   initValue={category}
                   style={{
-                    padding: 10,
                     borderRadius: 5,
                     borderColor: "#ccc",
-                    marginBottom: 15,
+                    marginBottom: 40,
+                    fontSize: 23, // Set font size to 25
                   }}
                   initValueTextStyle={{
                     color: category === "Select Category" ? "#808080" : "#000",
@@ -225,10 +233,10 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                   ]}
                   initValue={medium}
                   style={{
-                    padding: 10,
                     borderRadius: 5,
                     borderColor: "#ccc",
-                    marginBottom: 15,
+                    marginBottom: 60,
+                    fontSize: 23, // Set font size to 25
                   }}
                   initValueTextStyle={{
                     color: medium === "Select Medium" ? "#808080" : "#000",
@@ -252,12 +260,13 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                       borderColor: "#ccc",
                       marginBottom: 15,
                       minHeight: 200,
-                    }} // Increased minHeight for bigger textarea
+                      fontSize: 23, // Set font size to 25
+                    }}
                     placeholder="Enter article text"
                     value={articleText}
                     onChangeText={(text) => setArticleText(text)}
                     multiline={true}
-                    numberOfLines={4}
+                    numberOfLines={10}
                   />
                 )}
                 {medium === "Voice Record" && (
