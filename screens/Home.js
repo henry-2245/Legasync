@@ -6,6 +6,7 @@ import {
   View,
   Text,
   TextInput,
+  Button,
 } from "react-native";
 import Wisdom from "../component/Wisdom.js";
 import TabNavigator from "../component/TabNavigator.js";
@@ -15,9 +16,15 @@ import AddWisdom from "../component/AddWisdom.js";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Profile from "./Profile";
 import { Feather } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import Search from "./Search";
 import { Searchbar } from "react-native-paper";
 import NewAddWisdom from "./NewAddWisdom.js";
+import {
+  CopilotStep,
+  walkthroughable,
+  useCopilot,
+} from "react-native-copilot";
 
 const Home = () => {
   const Tab = createBottomTabNavigator();
@@ -41,23 +48,18 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [sortBy, setSortBy] = useState("Default");
 
-
-  // Use one use Effect instead of many to fix bug that keep refreshing
   useEffect(() => {
-    // Check if the selected category is "All Categories"
     if (selectedCategory === "All Categories") {
-      // Fetch data from your API endpoint for getAll
       fetch("https://legasync.azurewebsites.net/wisdom/getAll")
         .then((response) => response.json())
         .then((data) => {
-          setArticles(data); // Update articles state with fetched data
+          setArticles(data);
           console.log("Data fetched from wisdom/getAll:", data);
         })
         .catch((error) => {
           console.error("Error fetching data from wisdom/getAll:", error);
         });
     } else {
-      // Fetch data from your API endpoint for filterandSort
       let formdata = new FormData();
       formdata.append("category", selectedCategory);
       formdata.append("sortBy", sortBy);
@@ -71,7 +73,7 @@ const Home = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          setArticles(data); // Update articles state with fetched data
+          setArticles(data);
           console.log("Data fetched from wisdom/filterandSort:", data);
         })
         .catch((error) => {
@@ -82,68 +84,13 @@ const Home = () => {
         });
     }
 
-    // Set the initial selected category from the navigation params
     const { selectedCategory: routeCategory } = route.params || {};
     if (routeCategory) {
       setSelectedCategory(routeCategory);
     }
 
-    // Refresh the component whenever isAddPopupSubmitted changes
     setRefreshKey((prevKey) => prevKey + 1);
   }, [isAddPopupSubmitted, route.params, selectedCategory, sortBy]);
-
-  // useEffect(() => {
-  //   // Set the initial selected category from the navigation params
-  //   const { selectedCategory: routeCategory } = route.params || {};
-  //   if (routeCategory) {
-  //     setSelectedCategory(routeCategory);
-  //   }
-  //   // else{
-  //   //   selectedCategory("All Categories")
-  //   // }
-  // }, [route.params]);
-  // useEffect(() => {
-  //   // Refresh the component whenever isAddPopupSubmitted changes
-  //   setRefreshKey((prevKey) => prevKey + 1);
-  // }, [isAddPopupSubmitted]);
-
-  // useEffect(() => {
-  //   // Fetch data from your API endpoint
-  //   fetch("https://legasync.azurewebsites.net/wisdom/getAll")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       setArticles(data); // Update articles state with fetched data
-  //       console.log("data get from", articles);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching data:", error);
-  //     });
-  // }, [isAddPopupSubmitted]);
-
-  // // Sort Wisdom
-  // let formdata = new FormData();
-  // formdata.append("category", selectedCategory);
-  // formdata.append("sortBy", sortBy);
-  // console.log(formdata);
-
-  // Fetch data from API
-  // useEffect(() => {
-  //   fetch("https://legasync.azurewebsites.net/wisdom/filterandSort", {
-  //     method: "post",
-  //     headers: {
-  //       "Content-Type": "multipart/form-data",
-  //     },
-  //     body: formdata,
-  //   })
-  // .then((response) => response.json())
-  // .then((data) => {
-  //   setArticles(data); // Update articles state with fetched data
-  //   console.log("data get from", articles);
-  // })
-  // .catch((error) => {
-  //   console.error("Error fetching data:", error);
-  // });
-  // },[formdata]);
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
@@ -161,13 +108,6 @@ const Home = () => {
     setIsAddPopupVisible(false);
     setIsAddPopupSubmitted(true);
   };
-
-  {
-    /* Don't Delete for NewAddWisdom */
-  }
-  // const handleAddButtonPress = () => {
-  //   navigation.navigate("NewAddWisdom");
-  // };
 
   const renderArticles = () => {
     const filteredArticles =
@@ -196,7 +136,7 @@ const Home = () => {
               (selectedCategory === "All Categories" ||
                 article.category === selectedCategory)
           );
-    // ));
+
     const rows = [];
     for (let i = 0; i < filteredArticles.length; i += 2) {
       const rowArticles = filteredArticles.slice(i, i + 2);
@@ -219,23 +159,36 @@ const Home = () => {
     return rows;
   };
 
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (searchQuery) => {
     setSearchQuery(searchQuery);
-    console.log(searchQuery); // Handle search logic here
+    console.log(searchQuery);
   };
+
+  const WalkthroughableText = walkthroughable(Text);
+
+  const { start, copilotEvents } = useCopilot();
+  const [secondStepActive, setSecondStepActive] = useState(true);
+  const [lastEvent, setLastEvent] = useState(null);
+
+  useEffect(() => {
+    copilotEvents.on("stepChange", (step) => {
+      setLastEvent(`stepChange: ${step.name}`);
+    });
+    copilotEvents.on("start", () => {
+      setLastEvent(`start`);
+    });
+    copilotEvents.on("stop", () => {
+      setLastEvent(`stop`);
+    });
+  }, [copilotEvents]);
 
   return (
     <ScrollView style={styles.container} key={refreshKey}>
       <View style={styles.mainContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>Legasync</Text>
-          {/* <Searchbar
-            placeholder="Search..."
-            onChangeText={handleSearch}
-            value={searchQuery}
-          ></Searchbar> */}
           <View style={styles.searchInput}>
             <Feather name="search" size={24} color="black" />
             <TextInput
@@ -275,12 +228,25 @@ const Home = () => {
             )}
           </View>
 
-          <TouchableOpacity
-            onPress={handleAddButtonPress}
-            style={styles.addButton}
-          >
-            <Text style={styles.addButtonIcon}>+</Text>
+          {/* Tutorial Button */}
+
+          <TouchableOpacity style={styles.tutorialbtn} onPress={() => start()}>
+            <Entypo name="light-bulb" size={24} color="yellow" />
           </TouchableOpacity>
+          <CopilotStep
+            text="Press the '+' button to add wisdom"
+            order={1}
+            name="addWisdom"
+          >
+            <WalkthroughableText style={styles.addButtonPos}>
+              <TouchableOpacity
+                onPress={handleAddButtonPress}
+                style={styles.addButton}
+              >
+                <Text style={styles.addButtonIcon}>+</Text>
+              </TouchableOpacity>
+            </WalkthroughableText>
+          </CopilotStep>
         </View>
         <View style={styles.articleWrapper}>
           <View style={styles.articlesContainer}>{renderArticles()}</View>
@@ -298,6 +264,10 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
+  tabItem: {
+    flex: 1,
+    textAlign: "center",
+  },
   container: {
     display: "flex",
     backgroundColor: "#2F2D2D",
@@ -402,6 +372,16 @@ const styles = StyleSheet.create({
   articleAuthor: {
     fontSize: 14,
     color: "white",
+  },
+  tutorialbtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 25,
+    backgroundColor:""
+  },
+  addButtonPos: {
+    position: "absolute",
+    right: 10,
   },
   addButton: {
     position: "absolute",

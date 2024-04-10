@@ -9,6 +9,7 @@ import {
   ScrollView,
   Alert,
   KeyboardAvoidingView,
+  TouchableOpacity,
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -24,6 +25,8 @@ import {
 } from "firebase/storage";
 import { readAsStringAsync } from "expo-file-system";
 import VoiceRecorder from "./Audio/VoiceRecorder";
+import { CopilotStep, walkthroughable, useCopilot } from "react-native-copilot";
+import { Entypo } from "@expo/vector-icons";
 
 const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const navigation = useNavigation();
@@ -36,6 +39,23 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   const [profileImage, setProfileImage] = useState("");
 
   const [categories, setCategories] = useState([]); // Initialize categories state
+
+  // Tutorial
+  const { start, copilotEvents } = useCopilot();
+  const [secondStepActive, setSecondStepActive] = useState(true);
+  const [lastEvent, setLastEvent] = useState(null);
+
+  useEffect(() => {
+    copilotEvents.on("stepChange", (step) => {
+      setLastEvent(`stepChange: ${step.name}`);
+    });
+    copilotEvents.on("start", () => {
+      setLastEvent(`start`);
+    });
+    copilotEvents.on("stop", () => {
+      setLastEvent(`stop`);
+    });
+  }, [copilotEvents]);
 
   useEffect(() => {
     setCategory("Select Category");
@@ -183,6 +203,17 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
               contentContainerStyle={{ flexGrow: 1 }}
             >
               <View style={{ flex: 1 }}>
+                {/* <TouchableOpacity
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 25,
+                    backgroundColor: "", // Add your desired background color here
+                  }}
+                  onPress={() => start()}
+                >
+                  <Entypo name="light-bulb" size={24} color="yellow" />
+                </TouchableOpacity> */}
                 <Text
                   style={{
                     marginTop: 50,
