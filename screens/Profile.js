@@ -29,44 +29,35 @@ const Profile = ({ isYourOwnProfile }) => {
   const [ownfollowings, setownFollowings] = useState([]);
   const route = useRoute();
 
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedOtherusername = await AsyncStorage.getItem(
-          "other-username"
-        );
-        setOtherUsername(storedOtherusername)
-        const fetchUsername = isYourOwnProfile
-          ? storedUsername
-          : storedOtherusername;
-        console.log(storedOtherusername);
-        const response = await fetch(
-          `https://legasync.azurewebsites.net/collection/getAllCollection`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-            },
-            body: fetchUsername, // Use storedUsername instead of username directly
-          }
-        );
-        const data = await response.json();
-        setCollections(data);
-        console.log(fetchUsername);
-        console.log("profile", data);
-      } catch (error) {
-        console.error("Error fetching collections:", error);
-      }
-    };
-
-    if (isFocused) {
-      fetchData();
+  const fetchData = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedOtherusername = await AsyncStorage.getItem(
+        "other-username"
+      );
+      setOtherUsername(storedOtherusername);
+      const fetchUsername = isYourOwnProfile
+        ? storedUsername
+        : storedOtherusername;
+      console.log(storedOtherusername);
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/collection/getAllCollection`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: fetchUsername, // Use storedUsername instead of username directly
+        }
+      );
+      const data = await response.json();
+      setCollections(data);
+      console.log(fetchUsername);
+      console.log("profile", data);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
     }
-  }, [isFocused]);
-
+  };
 
   useEffect(() => {
     // Retrieve the initial username from AsyncStorage
@@ -86,8 +77,9 @@ const Profile = ({ isYourOwnProfile }) => {
         console.log("Error retrieving username:", error);
       }
     };
-
+     fetchAndSetArticles(); 
     getUsername();
+    
   }, []);
 
   useEffect(() => {
@@ -110,7 +102,6 @@ const Profile = ({ isYourOwnProfile }) => {
         const storedProfileImage = await AsyncStorage.getItem(
           "other-profileImage"
         );
-        
 
         if (storedProfileImage !== null) {
           setOtherProfileImage(storedProfileImage);
@@ -129,7 +120,7 @@ const Profile = ({ isYourOwnProfile }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [showFollowingPopup, setShowFollowingPopup] = useState(false);
   const [showFollowerPopup, setShowFollowerPopup] = useState(false);
-   // State to hold fetched collections
+  // State to hold fetched collections
 
   // const toggleFollow = () => {
   //   // Toggle the follow state and update the button text accordingly
@@ -156,30 +147,31 @@ const Profile = ({ isYourOwnProfile }) => {
           }
         );
         const data = await response.text();
-        console.log(data)
+        console.log(data);
         if (data === "Success: Unfollow ") {
-          console.log("unfollow")
+          console.log("unfollow");
           setIsFollowing(false); // Set isFollowing to false if unfollow is successful
         } else if (data === "Success: Follow") {
           setIsFollowing(true); // Set isFollowing to true if follow is successful
-          console.log("follow")
+          console.log("follow");
         }
         fetchUserData();
-        
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
     }
   };
-  
+
   useEffect(() => {
     const fetchFollowingStatus = async () => {
       try {
-        const storedOtherUsername = await AsyncStorage.getItem("other-username");
-        const username = await AsyncStorage.getItem("username")
+        const storedOtherUsername = await AsyncStorage.getItem(
+          "other-username"
+        );
+        const username = await AsyncStorage.getItem("username");
         if (storedOtherUsername) {
           setOtherUsername(storedOtherUsername);
-  
+
           // Fetch own followings
           const ownFollowingsResponse = await fetch(
             `https://legasync.azurewebsites.net/user/getFollowings`,
@@ -193,7 +185,7 @@ const Profile = ({ isYourOwnProfile }) => {
           );
           const ownFollowingsData = await ownFollowingsResponse.json();
           setownFollowings(ownFollowingsData);
-  
+
           // Check if the other user is among the current user's followings
           const isFollowingOtherUser = ownFollowingsData.some(
             (following) => following.username === storedOtherUsername
@@ -204,12 +196,14 @@ const Profile = ({ isYourOwnProfile }) => {
         console.error("Error fetching following status:", error);
       }
     };
-  
+    fetchAndSetArticles();
+
     fetchFollowingStatus();
     getFollowingFollowers();
-  }, [isFollowing]);
-  
-  
+    if (isFocused) {
+      fetchData();
+    }
+  }, [isFollowing, isFocused]);
 
   const openFollowingPopup = () => {
     navigation.navigate("FollowingPopup", { isYourOwnProfile });
@@ -222,38 +216,31 @@ const Profile = ({ isYourOwnProfile }) => {
   const [articles, setArticles] = useState("");
   const [articleCount, setArticleCount] = useState(0);
 
-  useEffect(() => {
-    const fetchAndSetArticles = async () => {
-      try {
-        const response = await fetch(
-          "https://legasync.azurewebsites.net/wisdom/getAll"
-        );
-        const data = await response.json();
-        const sortedArticles = data.filter(
-          (article) =>
-            article.wisdomOwner === (isYourOwnProfile ? username : otherUsername)
-        );
-        setArticles(sortedArticles);
-        setArticleCount(sortedArticles.length);
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-      }
-      
-    };
-    fetchAndSetArticles();
-    
+  const fetchAndSetArticles = async () => {
+    try {
+      const response = await fetch(
+        "https://legasync.azurewebsites.net/wisdom/getAll"
+      );
+      const data = await response.json();
+      const sortedArticles = data.filter(
+        (article) =>
+          article.wisdomOwner ===
+          (isYourOwnProfile ? username : otherUsername)
+      );
+      setArticles(sortedArticles);
+      setArticleCount(sortedArticles.length);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+  };
 
-   
-  }, [isYourOwnProfile, username, otherUsername]);
 
   const [user, setUser] = useState({});
   const fetchUserData = async () => {
     try {
       const storedUsername = await AsyncStorage.getItem("username");
-      const storedOtherusername = await AsyncStorage.getItem(
-        "other-username"
-      );
-      
+      const storedOtherusername = await AsyncStorage.getItem("other-username");
+
       const fetchUsername = isYourOwnProfile
         ? storedUsername
         : storedOtherusername;
@@ -265,7 +252,7 @@ const Profile = ({ isYourOwnProfile }) => {
           headers: {
             "Content-Type": "text/plain",
           },
-          body: fetchUsername
+          body: fetchUsername,
         }
       );
 
@@ -324,7 +311,6 @@ const Profile = ({ isYourOwnProfile }) => {
     }
   };
 
-
   useEffect(() => {
     const fetchFollowingFollowers = async () => {
       if (isFocused) {
@@ -334,10 +320,7 @@ const Profile = ({ isYourOwnProfile }) => {
 
     fetchFollowingFollowers();
   }, [isFocused, isYourOwnProfile]);
-  
 
-
-  
   useEffect(() => {
     if (route.params && route.params.profileImage) {
       // Update the profile image only if a new image URI is received
@@ -364,7 +347,7 @@ const Profile = ({ isYourOwnProfile }) => {
   };
   const handleEditProfile = () => {
     navigation.navigate("EditProfile", {
-     userData: user
+      userData: user,
     });
   };
 
@@ -405,7 +388,7 @@ const Profile = ({ isYourOwnProfile }) => {
           <Text style={styles.name}>{user.name}</Text> */}
           <Image
             source={
-              isYourOwnProfile ? {uri: user.urlPro} : { uri: user.urlPro }
+              isYourOwnProfile ? { uri: user.urlPro } : { uri: user.urlPro }
             }
             style={styles.profileImage}
           />
@@ -508,14 +491,22 @@ const Profile = ({ isYourOwnProfile }) => {
         {showFollowingPopup && (
           <FollowingPopup
             isYourOwnProfile={isYourOwnProfile}
-            onClose={() => setShowFollowingPopup(false)}
+            onClose={() => {
+              setShowFollowingPopup(false);
+              fetchUserData();
+              getFollowingFollowers();
+            }}
             followingList={followings}
           />
         )}
         {showFollowerPopup && (
           <FollowerPopup
             isYourOwnProfile={isYourOwnProfile}
-            onClose={() => setShowFollowerPopup(false)}
+            onClose={() => {
+              setShowFollowerPopup(false);
+              fetchUserData();
+              getFollowingFollowers();
+            }}
             followersList={followers}
           />
         )}

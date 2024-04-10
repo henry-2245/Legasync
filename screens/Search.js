@@ -18,19 +18,16 @@ const Search = () => {
 
   useEffect(() => {
     // Fetch data from your API endpoint
-    fetch('https://legasync.azurewebsites.net/wisdom/getAll')
-      .then(response => response.json())
-      .then(data => {
+    fetch("https://legasync.azurewebsites.net/wisdom/getMostLiked")
+      .then((response) => response.json())
+      .then((data) => {
         setArticles(data); // Update articles state with fetched data
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
   }, []);
 
- 
-
- 
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleSearch = () => {
@@ -98,8 +95,6 @@ const Search = () => {
                 <Text style={styles.contentText}>{"Personal Growth"}</Text>
               </TouchableOpacity>
             </View>
-            
-            
           </View>
 
           <View style={styles.forYouContent}>
@@ -135,8 +130,6 @@ const Search = () => {
                 <Text style={styles.contentText}>{"Health and Wellness"}</Text>
               </TouchableOpacity>
             </View>
-            
-            
           </View>
           <View style={styles.forYouContent}>
             <View style={styles.contentWrapper}>
@@ -171,8 +164,6 @@ const Search = () => {
                 <Text style={styles.contentText}>{"Education"}</Text>
               </TouchableOpacity>
             </View>
-            
-            
           </View>
           <View style={styles.forYouContent}>
             <View style={styles.contentWrapper}>
@@ -207,16 +198,13 @@ const Search = () => {
                 <Text style={styles.contentText}>{"Spirituality"}</Text>
               </TouchableOpacity>
             </View>
-            
-            
           </View>
-          
         </View>
 
         <View style={styles.trendingContainer}>
           <Text style={styles.trendingText}>Most liked Wisdom</Text>
           <View style={styles.articlesContainer}>
-            {articlesInRows.map((row, rowIndex) => (
+            {articlesInRows.slice(0, 3).map((row, rowIndex) => (
               <View key={rowIndex} style={styles.rowContainer}>
                 {row.map((article, index) => (
                   <View style={styles.articleContainer} key={index}>
@@ -285,12 +273,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 20,
-
   },
   forYouContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-
   },
   contentWrapper: {
     justifyContent: "space-between",
@@ -315,7 +301,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 3,
     borderTopColor: "grey",
     padding: 10,
-    
+
     backgroundColor: "#2F2D2D",
     paddingBottom: 30,
   },

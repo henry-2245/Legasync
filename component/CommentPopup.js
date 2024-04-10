@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CommentPopup = ({ comments, onClose, setComments }) => {
+const CommentPopup = ({ comments, onClose, setComments, wisdomID }) => {
   const [comment, setComment] = useState("");
   const [username, setUsername] = useState("");
   const scrollViewRef = useRef(null);
@@ -23,21 +23,44 @@ const CommentPopup = ({ comments, onClose, setComments }) => {
     getUsername();
   }, []);
 
-  useEffect(() => {
-    // Scroll to the bottom of the ScrollView when comments change
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [comments]);
+  
 
-  const handleCommentSubmit = () => {
+  const handleCommentSubmit = async () => {
     // Handle submitting the comment only if it's not empty
     if (comment.trim() !== "") {
-      const newComment = { username: username, text: comment.trim() };
-      setComment(""); // Clear the comment input after posting
-      setComments([...comments, newComment]); // Add the new comment to the comments array
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        const response = await fetch('https://legasync.azurewebsites.net/wisdom/comment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            wisdomID: wisdomID,
+            username: storedUsername,
+            comment: comment.trim(),
+          }),
+        });
+        const responseData = await response.text();
+        if (responseData === 'Success: Comment') {
+          // Add the new comment to the comments list
+          const newComment = { username: storedUsername, comment: comment.trim() };
+          setComments(prevComments => [...prevComments, newComment]);
+          setComment(""); // Clear the comment input after posting
+          // Scroll to the bottom of the ScrollView
+          if (scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd({ animated: true });
+          }
+        } else {
+          console.error('Failed to post comment:', responseData);
+        }
+      } catch (error) {
+        console.error('Error posting comment:', error);
+      }
     }
   };
+  
+    
 
   return (
     <View style={styles.popupContainer}>
@@ -51,7 +74,7 @@ const CommentPopup = ({ comments, onClose, setComments }) => {
         {comments.map((c, index) => (
           <View key={index} style={styles.commentItem}>
             <Text style={styles.commentUsername}>{c.username}</Text>
-            <Text style={styles.commentText}>{c.text}</Text>
+            <Text style={styles.commentText}>{c.comment}</Text>
           </View>
         ))}
         <View style={styles.scrollEndDummy} />

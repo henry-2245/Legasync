@@ -21,11 +21,13 @@ import AudioPlayer from "../component/Audio/AudioPlayer";
 
 const WisdomDetail = ({ route }) => {
   const { article } = route.params;
+  console.log(article.urlrec)
   const navigation = useNavigation();
   const [initialLikeCount, setInitialLikeCount] = useState(article.likes);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [articles, setArticles] = useState("");
+  const [wisdom, setWisdom] = useState([]);
   const [comments, setComments] = useState([]);
   const [isHearted, setIsHearted] = useState(false);
   const [isBookmark, setIsBookmark] = useState(false);
@@ -42,20 +44,158 @@ const WisdomDetail = ({ route }) => {
 
   useEffect(() => {
     // Fetch data from your API endpoint when the component mounts
+    fetchLikeStatus();
+    fetchBookmarkStatus();
     fetchCollections();
-  }, []);
+    getAllWisdom();
+    getComment(article.wisdomID);
+  }, [article]);
 
-  useEffect(() => {
-    // Fetch data from your API endpoint
-    fetch("https://legasync.azurewebsites.net/wisdom/getAll")
-      .then((response) => response.json())
-      .then((data) => {
-        setArticles(data); // Update articles state with fetched data
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
+  const getComment = async (wisdomID) => {
+    try {
+      const response = await fetch('https://legasync.azurewebsites.net/wisdom/getComment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wisdomID: wisdomID,
+        }),
       });
-  }, []);
+      const data = await response.json();
+      setComments(data);
+      console.log("comment", data)
+      await console.log("comment2", comments)
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
+  const fetchLikeStatus = async () => {
+    try {
+      const username = await AsyncStorage.getItem("username");
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/wisdom/getLike`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            wisdomID: article.wisdomID,
+          }),
+        }
+      );
+      const data = await response.text();
+      console.log(data)
+      if(parseInt(data) === 1){
+        setIsHearted(true);
+        
+
+      }
+      else{
+        setIsHearted(false);
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching like status:", error);
+    }
+  };
+
+  const fetchBookmarkStatus = async () => {
+    try{
+      const username = await AsyncStorage.getItem("username");
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/wisdom/getBookmarkStatus`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            wisdomID: article.wisdomID,
+          }),
+          
+        }
+      );
+      const data = await response.text();
+      console.log(data)
+      if(parseInt(data) === 1){
+        setIsBookmark(true);
+
+      }
+      else{
+        setIsBookmark(false);
+      }
+
+  } catch (error) {
+    console.error("Error fetching bookmark status:", error);
+  }
+};
+
+  const handleHeartPress = async () => {
+    try {
+      const username = await AsyncStorage.getItem("username");
+      const response = await fetch(
+        `https://legasync.azurewebsites.net/wisdom/like`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            wisdomID: article.wisdomID,
+            liked: 1,
+          }),
+        }
+      );
+      if (response.ok) {
+        setIsHearted(!isHearted);
+        getAllWisdom();
+      } else {
+        console.error("Failed to update like status");
+      }
+    } catch (error) {
+      console.error("Error liking/unliking wisdom:", error);
+    }
+  };
+  const handleBookmarkPress = () => {
+    setShowSavePopup(true); // Show save popup
+  };
+  
+
+  
+
+  const getAllWisdom = async () => {
+    try {
+      // Fetch data from your API endpoint
+      const response = await fetch("https://legasync.azurewebsites.net/wisdom/getRelate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: article.category
+    });
+      const data = await response.json();
+      setArticles(data)
+  
+      // Filter the data based on article.wisdomID
+      const matchedItem = data.find((item) => item.wisdomID === article.wisdomID);
+  
+      // Update articles state with filtered data
+      setWisdom(matchedItem);
+      console.log("wisdom",matchedItem ? [matchedItem] : [])
+      console.log("wisdom2", wisdom)
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+   
 
   const fetchCollections = async () => {
     try {
@@ -80,15 +220,11 @@ const WisdomDetail = ({ route }) => {
     }
   };
 
-  const handleHeartPress = () => {
-    setIsHearted((prev) => !prev);
-    article.likeAmount += isHearted ? -1 : 1;
-  };
-  const handleBookmarkPress = () => {
-    setIsBookmark((prev) => !prev);
-    article.bookmarkAmount += isBookmark ? -1 : 1;
-    setShowSavePopup(true);
-  };
+  // const handleHeartPress = () => {
+  //   setIsHearted((prev) => !prev);
+  //   article.likeAmount += isHearted ? -1 : 1;
+  // };
+  
 
   const handleProfilePress = async () => {
     const username = (await AsyncStorage.getItem("username")).toString();
@@ -113,10 +249,10 @@ const WisdomDetail = ({ route }) => {
   };
 
   const handleCloseCommentPopup = (updatedComments) => {
-    if (Array.isArray(updatedComments)) {
-      setComments(updatedComments);
-    }
+    
     setCommentPopupVisible(false);
+    getAllWisdom()
+    getComment(article.wisdomID)
   };
 
   const handlePressPlay = () => {
@@ -125,6 +261,7 @@ const WisdomDetail = ({ route }) => {
   };
 
   const handleSaveToList = async (collectionIDs) => {
+    
     const selectedCollections = collectionIDs.map((collectionID) => {
       return {
         collectionID: collectionID,
@@ -146,9 +283,15 @@ const WisdomDetail = ({ route }) => {
   
       if (responseData === 'Success') {
         alert('Add wisdom to collection success!!!');
+        if (!isBookmark) {
+          setIsBookmark(true); // Set bookmark status to true only if it's currently false
+          getAllWisdom(); // Call getAllWisdom to update bookmark amount
+        }
+        getAllWisdom();
+
       } else {
         console.log(responseData)
-        alert('Failed to add wisdom to collection');
+        alert('Wisdom already in the collection');
       }
     } catch (error) {
       console.error('Error adding wisdom to collection:', error);
@@ -190,6 +333,7 @@ const WisdomDetail = ({ route }) => {
     if (data === "Success") {
       console.log("Collection created successfully");
       await fetchCollections();
+      
     } else {
       console.error("Failed to create collection:", data);
     }
@@ -210,9 +354,6 @@ const WisdomDetail = ({ route }) => {
   }, [article]);
 
   useEffect(() => {
-    setIsHearted(false);
-    article.likes = initialLikeCount;
-    setComments([]);
     setCommentPopupVisible(false);
   }, [article]);
 
@@ -290,7 +431,7 @@ const WisdomDetail = ({ route }) => {
             size={26}
             color={isHearted ? "red" : "#E0E0E0"}
           />
-          <Text style={styles.menuBarText}>{article.likeAmount || 0}</Text>
+          <Text style={styles.menuBarText}>{wisdom.likeAmount}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBarButton}
@@ -298,7 +439,7 @@ const WisdomDetail = ({ route }) => {
         >
           <Ionicons name="chatbubbles-outline" size={26} color="#E0E0E0" />
           <Text style={styles.menuBarText}>
-            {article.comment ? article.comment : 0}
+            {wisdom.commentAmount}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -310,11 +451,7 @@ const WisdomDetail = ({ route }) => {
             size={26}
             color={isBookmark ? "yellow" : "#E0E0E0"}
           />
-          <Text style={styles.menuBarText}>{article.bookmarkAmount || 0}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuBarButton}>
-          <Ionicons name="share-social-outline" size={26} color="#E0E0E0" />
-          <Text style={styles.menuBarText}>1</Text>
+          <Text style={styles.menuBarText}>{wisdom.bookmarkAmount}</Text>
         </TouchableOpacity>
       </View>
 
@@ -322,9 +459,10 @@ const WisdomDetail = ({ route }) => {
 
       {commentPopupVisible && (
         <CommentPopup
-          comments={[]}
+          comments={comments}
           onClose={handleCloseCommentPopup}
           setComments={setComments}
+          wisdomID={article.wisdomID}
         />
       )}
 
@@ -417,6 +555,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
+    paddingHorizontal: 30,
   },
   menuBarButton: {
     alignItems: "center",

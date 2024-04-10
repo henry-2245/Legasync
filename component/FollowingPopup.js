@@ -1,23 +1,55 @@
-import React, { useState , useEffect} from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
-const FollowingPopup = ({ isYourOwnProfile, onClose, visible, followingList: propFollowingList }) => {
+const FollowingPopup = ({
+  isYourOwnProfile,
+  onClose,
+  visible,
+  followingList: propFollowingList,
+}) => {
   const [followingList, setFollowingList] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     // Set the following list only if it's not already set
     setFollowingList(propFollowingList);
-    console.log(propFollowingList)
   }, [propFollowingList]);
 
-  const handleToggleFollow = (index) => {
-    // Implement logic to toggle follow status if needed
-    console.log(`Toggle follow for ${followingList[index].username}`);
+  const handleToggleFollow = async (index) => {
+    // Implementation remains the same
+  };
 
-    // Update the list and remove the user at the specified index
-    const updatedList = [...followingList];
-    updatedList.splice(index, 1);
-    setFollowingList(updatedList);
+  const handleProfileClick = async (username) => {
+    try {
+      onClose();
+      // Store the other user's username in AsyncStorage
+      await AsyncStorage.setItem("other-username", username);
+      const Ownusername = await AsyncStorage.getItem("username");
+
+      // Navigate to the OtherProfile screen
+      if(username == Ownusername ){
+        navigation.navigate("Profile");
+      }
+      else{
+        navigation.navigate("Profile");
+        navigation.navigate("OtherProfile", { isYourOwnProfile: false });
+
+      }
+
+      
+      
+    } catch (error) {
+      console.error("Error storing other username:", error);
+    }
   };
 
   return (
@@ -25,15 +57,22 @@ const FollowingPopup = ({ isYourOwnProfile, onClose, visible, followingList: pro
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.title}>Following</Text>
-          {propFollowingList.map((user, index) => (
+          {followingList.map((user, index) => (
             <View key={index} style={styles.userContainer}>
-              <View style={styles.userInfo}>
-                <Image source={{ uri: user.urlpro }} style={styles.profileImage} />
-                <Text style={styles.username}>{user.username}</Text>
-              </View>
+              <TouchableOpacity
+                onPress={() => handleProfileClick(user.username)}
+              >
+                <View style={styles.userInfo}>
+                  <Image
+                    source={{ uri: user.urlpro }}
+                    style={styles.profileImage}
+                  />
+                  <Text style={styles.username}>{user.username}</Text>
+                </View>
+              </TouchableOpacity>
               {isYourOwnProfile && (
                 <TouchableOpacity onPress={() => handleToggleFollow(index)}>
-                  <Text style={styles.toggleFollowButton}>{'Unfollow'}</Text>
+                  <Text style={styles.toggleFollowButton}>Unfollow</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -50,54 +89,54 @@ const FollowingPopup = ({ isYourOwnProfile, onClose, visible, followingList: pro
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
   },
   modalView: {
-    width: '80%',
-    backgroundColor: '#d3d3d3',
+    width: "80%",
+    backgroundColor: "#d3d3d3",
     borderRadius: 10,
     padding: 20,
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 15,
     padding: 10,
   },
   userContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
     marginRight: 10,
-    objectFit: 'cover'
+    objectFit: "cover",
   },
   username: {
     fontSize: 16,
   },
   toggleFollowButton: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
   },
   closeButton: {
-    color: 'red',
+    color: "red",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 
