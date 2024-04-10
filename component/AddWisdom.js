@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -112,7 +113,7 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
             throw new Error("Failed to fetch Blob");
           }
           const blobData = await response.blob();
-         
+
           const voiceRef = ref(storage, `voice/${voiceName}`);
           await uploadBytesResumable(voiceRef, blobData);
 
@@ -154,91 +155,41 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
   };
 
   return (
-    <Modal visible={visible} transparent={true} animationType="slide">
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-        }}
-      >
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <Modal visible={visible} transparent={true} animationType="slide">
         <View
           style={{
-            height: "82%",
-            width: "90%",
-            backgroundColor: "white",
-            borderRadius: 10,
-            padding: 20,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
           }}
         >
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "bold",
-                  marginBottom: 10,
-                  textAlign: "center",
-                  paddingVertical: 20,
-                }}
-              >
-                Add New Wisdom
-              </Text>
-              <TextInput
-                style={{
-                  padding: 10,
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  borderColor: "#ccc",
-                  marginBottom: 15,
-                }}
-                placeholder="Enter title of article"
-                value={title}
-                onChangeText={(text) => setTitle(text)}
-              />
-              <ModalSelector
-                data={categories}
-                initValue={category}
-                style={{
-                  padding: 10,
-                  borderRadius: 5,
-                  borderColor: "#ccc",
-                  marginBottom: 15,
-                }}
-                initValueTextStyle={{
-                  color: category === "Select Category" ? "#808080" : "#000",
-                }}
-                selectTextStyle={{ color: "#000" }}
-                onChange={(option) => setCategory(option.label)}
-              />
-              <ModalSelector
-                data={[
-                  { key: 0, label: "Video" },
-                  { key: 1, label: "Article" },
-                  { key: 2, label: "Voice Record" },
-                ]}
-                initValue={medium}
-                style={{
-                  padding: 10,
-                  borderRadius: 5,
-                  borderColor: "#ccc",
-                  marginBottom: 15,
-                }}
-                initValueTextStyle={{
-                  color: medium === "Select Medium" ? "#808080" : "#000",
-                }}
-                selectTextStyle={{ color: "#000" }}
-                onChange={(option) => {
-                  setMedium(option.label);
-                }}
-              />
-              {(medium === "Video" || medium === "Article") && (
-                <View style={{ marginBottom: 15 }}>
-                  <Picker />
-                </View>
-              )}
-              {medium === "Article" && (
+          <View
+            style={{
+              height: "82%",
+              width: "90%",
+              backgroundColor: "white",
+              borderRadius: 10,
+              padding: 20,
+            }}
+          >
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 26,
+                    fontWeight: "bold",
+                    marginBottom: 10,
+                    textAlign: "center",
+                    paddingVertical: 20,
+                  }}
+                >
+                  Add New Wisdom
+                </Text>
                 <TextInput
                   style={{
                     padding: 10,
@@ -246,36 +197,98 @@ const AddWisdom = ({ visible, onClose, onAddWisdom }) => {
                     borderRadius: 5,
                     borderColor: "#ccc",
                     marginBottom: 15,
-                    minHeight: 200,
-                  }} // Increased minHeight for bigger textarea
-                  placeholder="Enter article text"
-                  value={articleText}
-                  onChangeText={(text) => setArticleText(text)}
-                  multiline={true}
-                  numberOfLines={4}
+                  }}
+                  placeholder="Enter title of article"
+                  value={title}
+                  onChangeText={(text) => setTitle(text)}
                 />
-              )}
-              {medium === "Voice Record" && (
-                <View style={{ marginBottom: 15 }}>
-                  <VoiceRecorder></VoiceRecorder>
-                  <Picker />
-                </View>
-              )}
-              <View
-                style={{ flexDirection: "row", justifyContent: "space-around" }}
-              >
-                <View style={{ width: 120 }}>
-                  <Button title="Cancel" onPress={onClose} color="#808080" />
-                </View>
-                <View style={{ width: 120 }}>
-                  <Button title="Post" onPress={handleSubmit} color="#f5ca31" />
+                <ModalSelector
+                  data={categories}
+                  initValue={category}
+                  style={{
+                    padding: 10,
+                    borderRadius: 5,
+                    borderColor: "#ccc",
+                    marginBottom: 15,
+                  }}
+                  initValueTextStyle={{
+                    color: category === "Select Category" ? "#808080" : "#000",
+                  }}
+                  selectTextStyle={{ color: "#000" }}
+                  onChange={(option) => setCategory(option.label)}
+                />
+                <ModalSelector
+                  data={[
+                    { key: 0, label: "Video" },
+                    { key: 1, label: "Article" },
+                    { key: 2, label: "Voice Record" },
+                  ]}
+                  initValue={medium}
+                  style={{
+                    padding: 10,
+                    borderRadius: 5,
+                    borderColor: "#ccc",
+                    marginBottom: 15,
+                  }}
+                  initValueTextStyle={{
+                    color: medium === "Select Medium" ? "#808080" : "#000",
+                  }}
+                  selectTextStyle={{ color: "#000" }}
+                  onChange={(option) => {
+                    setMedium(option.label);
+                  }}
+                />
+                {(medium === "Video" || medium === "Article") && (
+                  <View style={{ marginBottom: 15 }}>
+                    <Picker />
+                  </View>
+                )}
+                {medium === "Article" && (
+                  <TextInput
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      borderColor: "#ccc",
+                      marginBottom: 15,
+                      minHeight: 200,
+                    }} // Increased minHeight for bigger textarea
+                    placeholder="Enter article text"
+                    value={articleText}
+                    onChangeText={(text) => setArticleText(text)}
+                    multiline={true}
+                    numberOfLines={4}
+                  />
+                )}
+                {medium === "Voice Record" && (
+                  <View style={{ marginBottom: 15 }}>
+                    <VoiceRecorder></VoiceRecorder>
+                    <Picker />
+                  </View>
+                )}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <View style={{ width: 120 }}>
+                    <Button title="Cancel" onPress={onClose} color="#808080" />
+                  </View>
+                  <View style={{ width: 120 }}>
+                    <Button
+                      title="Post"
+                      onPress={handleSubmit}
+                      color="#f5ca31"
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          </ScrollView>
+            </ScrollView>
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+    </KeyboardAvoidingView>
   );
 };
 

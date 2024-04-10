@@ -41,33 +41,109 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [sortBy, setSortBy] = useState("Default");
 
+
+  // Use one use Effect instead of many to fix bug that keep refreshing
   useEffect(() => {
+    // Check if the selected category is "All Categories"
+    if (selectedCategory === "All Categories") {
+      // Fetch data from your API endpoint for getAll
+      fetch("https://legasync.azurewebsites.net/wisdom/getAll")
+        .then((response) => response.json())
+        .then((data) => {
+          setArticles(data); // Update articles state with fetched data
+          console.log("Data fetched from wisdom/getAll:", data);
+        })
+        .catch((error) => {
+          console.error("Error fetching data from wisdom/getAll:", error);
+        });
+    } else {
+      // Fetch data from your API endpoint for filterandSort
+      let formdata = new FormData();
+      formdata.append("category", selectedCategory);
+      formdata.append("sortBy", sortBy);
+
+      fetch("https://legasync.azurewebsites.net/wisdom/filterandSort", {
+        method: "post",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formdata,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setArticles(data); // Update articles state with fetched data
+          console.log("Data fetched from wisdom/filterandSort:", data);
+        })
+        .catch((error) => {
+          console.error(
+            "Error fetching data from wisdom/filterandSort:",
+            error
+          );
+        });
+    }
+
     // Set the initial selected category from the navigation params
     const { selectedCategory: routeCategory } = route.params || {};
     if (routeCategory) {
       setSelectedCategory(routeCategory);
     }
-    // else{
-    //   selectedCategory("All Categories")
-    // }
-  }, [route.params]);
-  useEffect(() => {
+
     // Refresh the component whenever isAddPopupSubmitted changes
     setRefreshKey((prevKey) => prevKey + 1);
-  }, [isAddPopupSubmitted]);
+  }, [isAddPopupSubmitted, route.params, selectedCategory, sortBy]);
 
-  useEffect(() => {
-    // Fetch data from your API endpoint
-    fetch("https://legasync.azurewebsites.net/wisdom/getAll")
-      .then((response) => response.json())
-      .then((data) => {
-        setArticles(data); // Update articles state with fetched data
-        console.log("data get from", articles);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, [isAddPopupSubmitted]);
+  // useEffect(() => {
+  //   // Set the initial selected category from the navigation params
+  //   const { selectedCategory: routeCategory } = route.params || {};
+  //   if (routeCategory) {
+  //     setSelectedCategory(routeCategory);
+  //   }
+  //   // else{
+  //   //   selectedCategory("All Categories")
+  //   // }
+  // }, [route.params]);
+  // useEffect(() => {
+  //   // Refresh the component whenever isAddPopupSubmitted changes
+  //   setRefreshKey((prevKey) => prevKey + 1);
+  // }, [isAddPopupSubmitted]);
+
+  // useEffect(() => {
+  //   // Fetch data from your API endpoint
+  //   fetch("https://legasync.azurewebsites.net/wisdom/getAll")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setArticles(data); // Update articles state with fetched data
+  //       console.log("data get from", articles);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //     });
+  // }, [isAddPopupSubmitted]);
+
+  // // Sort Wisdom
+  // let formdata = new FormData();
+  // formdata.append("category", selectedCategory);
+  // formdata.append("sortBy", sortBy);
+  // console.log(formdata);
+
+  // Fetch data from API
+  // useEffect(() => {
+  //   fetch("https://legasync.azurewebsites.net/wisdom/filterandSort", {
+  //     method: "post",
+  //     headers: {
+  //       "Content-Type": "multipart/form-data",
+  //     },
+  //     body: formdata,
+  //   })
+  // .then((response) => response.json())
+  // .then((data) => {
+  //   setArticles(data); // Update articles state with fetched data
+  //   console.log("data get from", articles);
+  // })
+  // .catch((error) => {
+  //   console.error("Error fetching data:", error);
+  // });
+  // },[formdata]);
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
@@ -185,8 +261,8 @@ const Home = () => {
                 data={[
                   { key: "Default", label: "Default" },
                   { key: "Most Liked", label: "Most Liked" },
-                  { key: "Most Viewed", label: "Most Viewed" },
-                  { key: "Most Recent", label: "Most Recent" },
+                  { key: "Most Saved", label: "Most Saved" },
+                  { key: "Newest", label: "Newest" },
                   { key: "Oldest", label: "Oldest" },
                 ]}
                 initValue={sortBy}

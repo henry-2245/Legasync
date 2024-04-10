@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: "bold",
-    marginLeft: 150,
+    marginLeft: 135,
 
     justifyContent: "center",
   },
